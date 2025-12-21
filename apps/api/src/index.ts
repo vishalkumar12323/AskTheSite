@@ -1,3 +1,6 @@
-import express from "express";
+import { app } from "./app";
+import { env } from "./config/env.js";
 
-const app = express();
+app.listen(env.PORT, () => {
+  console.log(`API running on port ${env.PORT}`);
+});
