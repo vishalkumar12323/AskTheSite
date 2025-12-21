@@ -2,9 +2,30 @@ import { db } from "@db/index";
 import { tasks } from "@db/db/schema";
 import { eq } from "drizzle-orm";
 
-export const processTaskJob = async (taskId: string) => {
-  await db
-    .update(tasks)
-    .set({ status: "PROCESSING" })
-    .where(eq(tasks.id, taskId));
+import {
+  markCompleted,
+  markFailed,
+  markProcessing,
+} from "./services/task.services.js";
+import { askAI } from "./services/ai.service.js";
+import { scrapeWebsite } from "./services/scrape.service.js";
+
+export const processTaskJobs = async (taskId: string) => {
+  try {
+    const task = await db.select().from(tasks).where(eq(tasks.id, taskId));
+    if (!task) throw new Error("Task not found.");
+
+    await markProcessing(taskId);
+
+    const webContent = await scrapeWebsite(task[0].url);
+
+    const aiAns = await askAI(webContent, task[0].question);
+
+    await markCompleted(taskId, aiAns);
+  } catch (error: any) {
+    console.error("❌ Job failed:", error.message);
+    await markFailed(taskId, error.message);
+
+    throw error;
+  }
 };

@@ -31,7 +31,7 @@ COPY pnpm-lock.yaml ./
 
 RUN pnpm install --omit-dev
 
-COPY --from=builder /app/dist ./dist
+COPY --from=producation /app/dist ./dist
 
 EXPOSE 4000
 
