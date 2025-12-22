@@ -1,4 +1,4 @@
-import { taskQueue } from "src/queues/task.queue";
+import { taskQueue } from "../queues/task.queue.js";
 
 export const addTaskToQueue = async (taskId: string) => {
   await taskQueue.add("process-task", {

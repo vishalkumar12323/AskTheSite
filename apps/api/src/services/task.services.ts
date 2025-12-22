@@ -1,5 +1,5 @@
-import { tasks } from "@db/db/schema.js";
-import { db } from "@db/index.js";
+import { tasks } from "../../../database/src/db/schema.js";
+import { db } from "../../../database/src/index.js";
 import { eq } from "drizzle-orm";
 import { addTaskToQueue } from "./queue.service.js";
 

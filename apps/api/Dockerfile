@@ -1,44 +1,36 @@
-# Stage 1: Base image for both dev and prod env.
+# ---------- Base ----------
 FROM node:20-alpine AS base
-
 WORKDIR /app
 
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
+RUN npm install -g pnpm
 
-RUN npm install -g pnpm && pnpm install
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+
 COPY . .
 
-
-# Stage 2: For development
-FROM base AS development
+# ---------- Development ----------
+FROM base AS dev
 ENV NODE_ENV=development
+EXPOSE 4000
+CMD ["pnpm", "dev:watch"]
 
-
-CMD [ "pnpm", "dev" ]
-
-
-# Stage 3: Production build
-FROM base AS builder
-ENV NODE_ENV=producation
-
+# ---------- Build ----------
+FROM base AS build
+ENV NODE_ENV=production
 RUN pnpm build
 
-
-
-# Stage 4: Producation (Runtime only)
+# ---------- Production ----------
 FROM node:20-alpine AS prod
 WORKDIR /app
+ENV NODE_ENV=production
 
-ENV NODE_ENV=producation
+RUN npm install -g pnpm
 
-COPY package.json ./
-COPY pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod
 
-RUN pnpm install --omit-dev
-
-COPY --from=builder /app/dist ./dist
+COPY --from=build /app/dist ./dist
 
 EXPOSE 4000
-
-CMD [ "pnpm", "start" ]
+CMD ["pnpm", "start"]

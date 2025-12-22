@@ -12,11 +12,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmitOnError": true,
-    "baseUrl": ".",
-    "paths": {
-      "@db/*": ["../database/src/*"]
-    }
+    "baseUrl": "."
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "../database/src/**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
