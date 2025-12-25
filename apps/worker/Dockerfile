@@ -1,35 +1,49 @@
-FROM node:20-alpine AS base
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy AS base
+
+# Install pnpm
+RUN npm install -g pnpm@10.25.0
+
+# Dependencies stage
+FROM base AS deps
+WORKDIR /app
+RUN echo "node-linker=hoisted" > .npmrc
+
+# Copy package files
+COPY worker/package.json worker/pnpm-lock.yaml ./worker/
+COPY database/package.json database/pnpm-lock.yaml ./database/
+
+# Install dependencies for database
+WORKDIR /app/database
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app/worker
+RUN pnpm install --frozen-lockfile
+
+# Builder stage
+FROM base AS builder
 WORKDIR /app
 
-RUN npm install -g pnpm
+COPY --from=deps /app ./
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+COPY worker ./worker
+COPY database ./database
 
-COPY . .
-
-
-# ---------- Development ----------
-FROM base AS dev
-ENV NODE_ENV=development
-CMD ["pnpm", "dev:watch"]
-
-
-# ---------- Build ----------
-FROM base AS build
-ENV NODE_ENV=production
+WORKDIR /app/worker
 RUN pnpm build
 
-# ---------- Production ----------
-FROM node:20-alpine AS prod
+# Runner stage
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 
-RUN npm install -g pnpm
+ENV NODE_ENV production
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod
+# Install pnpm (needed if we use pnpm start, but we use node)
+# We might need it if the app spawns pnpm? Unlikely using node dist/...
 
-COPY --from=build /app/dist ./dist
+COPY --from=builder /app/worker/dist ./dist
+COPY --from=builder /app/worker/node_modules ./node_modules
+COPY --from=builder /app/worker/package.json ./package.json
 
-CMD ["pnpm", "start"]
+# Note: Playwright browsers are in the base image.
+
+CMD ["node", "dist/worker/src/index.js"]

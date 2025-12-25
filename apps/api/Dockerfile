@@ -1,36 +1,63 @@
-# ---------- Base ----------
-FROM node:20-alpine AS base
+FROM node:18-alpine AS base
+
+# Install pnpm
+RUN npm install -g pnpm@10.25.0
+
+# Dependencies stage
+FROM base AS deps
+WORKDIR /app
+RUN echo "node-linker=hoisted" > .npmrc
+
+# Copy package files for api and database
+COPY api/package.json api/pnpm-lock.yaml ./api/
+COPY database/package.json database/pnpm-lock.yaml ./database/
+
+# Install dependencies for database
+WORKDIR /app/database
+RUN pnpm install --frozen-lockfile
+
+# Install dependencies for api
+WORKDIR /app/api
+RUN pnpm install --frozen-lockfile
+
+# Builder stage
+FROM base AS builder
 WORKDIR /app
 
-RUN npm install -g pnpm
+COPY --from=deps /app ./
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+# Copy source code
+COPY api ./api
+COPY database ./database
 
-COPY . .
-
-# ---------- Development ----------
-FROM base AS dev
-ENV NODE_ENV=development
-EXPOSE 4000
-CMD ["pnpm", "dev:watch"]
-
-# ---------- Build ----------
-FROM base AS build
-ENV NODE_ENV=production
+# Build api
+WORKDIR /app/api
 RUN pnpm build
 
-# ---------- Production ----------
-FROM node:20-alpine AS prod
+# Runner stage
+FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 
-RUN npm install -g pnpm
+ENV NODE_ENV production
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod
+# Copy built files and node_modules
+# We need database/ dist or source? 
+# The build output of api likely includes compiled database code if it was imported.
+# api/tsconfig.json has outDir: dist and includes ../database
+# So dist/ will contain the compiled code.
+# The structure in dist will mimic the structure of rootDir (which is ..).
+# So dist/api/src/index.js and dist/database/...
 
-COPY --from=build /app/dist ./dist
+COPY --from=builder /app/api/dist ./dist
+COPY --from=builder /app/api/node_modules ./node_modules
+COPY --from=builder /app/api/package.json ./package.json
 
-EXPOSE 4000
-CMD ["pnpm", "start"]
+# We might need production deps only... but let's stick to simple copy for now.
+# Pruning dev deps in a monorepo-like feel without workspace tools is tricky manually.
+# Keeping it simple.
+
+USER node
+
+EXPOSE 8000
+
+CMD ["node", "dist/api/src/index.js"]

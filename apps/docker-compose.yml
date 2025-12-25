@@ -1,0 +1,67 @@
+services:
+  # web:
+  #   build:
+  #     context: ./web
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - API_URL=http://api:8000
+  #   volumes:
+  #     - ./web:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   depends_on:
+  #     - api
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:pgpassword@localhost:5433/ats
+      - REDIS_URL=redis://localhost:6379
+      - PORT=8000
+    volumes:
+      - ./api:/app/api
+      - ./database:/app/database
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://postgres:pgpassword@localhost:5433/ats
+      - REDIS_URL=redis://localhost:6379
+    volumes:
+      - ./worker:/app/worker
+      - ./database:/app/database
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pgpassword
+      - POSTGRES_DB=ats
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:

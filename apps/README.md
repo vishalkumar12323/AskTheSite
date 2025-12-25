@@ -99,13 +99,13 @@
 
 ### API (apps/api/.env)
 
-    DATABASE_URL=postgresql://postgres:password@postgres:5432/askthesite
+    DATABASE_URL=postgresql://postgres:pgpassword@postgres:5432/askthesite
     REDIS_URL=redis://redis:6379
     PORT=4000
 
 ### Worker (apps/worker/.env)
 
-    DATABASE_URL=postgresql://postgres:password@postgres:5432/askthesite
+    DATABASE_URL=postgresql://postgres:pgpassword@postgres:5432/askthesite
     REDIS_URL=redis://redis:6379
     AI_API_KEY=your_api_key
     AI_BASE_URL=https://api.openai.com/v1

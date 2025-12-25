@@ -13,4 +13,8 @@ app.use("/api/tasks", taskRoutes);
 
 app.use(errorHandler);
 
+app.get("/", (_req, res) => {
+  res.status(200).json({ msg: "api server successfully running..." });
+});
+
 export { app };

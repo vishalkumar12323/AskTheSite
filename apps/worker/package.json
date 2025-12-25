@@ -21,7 +21,8 @@
     "drizzle-orm": "^0.45.1",
     "ioredis": "^5.8.2",
     "openai": "^6.15.0",
-    "playwright": "^1.57.0"
+    "playwright": "^1.57.0",
+    "postgres": "^3.4.7"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

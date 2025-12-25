@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      target: runner
+    volumes: []
+    restart: always
+
+  api:
+    build:
+      target: runner
+    volumes: []
+    restart: always
+
+  worker:
+    build:
+      target: runner
+    volumes: []
+    restart: always
+
+  postgres:
+    restart: always
+
+  redis:
+    restart: always

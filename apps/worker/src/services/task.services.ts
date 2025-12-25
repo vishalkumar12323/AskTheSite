@@ -1,5 +1,5 @@
-import { db } from "@db/index";
-import { tasks } from "@db/db/schema";
+import { db } from "../../../database/src/index.js";
+import { tasks } from "../../../database/src/db/schema.js";
 import { eq } from "drizzle-orm";
 
 export const markProcessing = async (taskId: string) => {

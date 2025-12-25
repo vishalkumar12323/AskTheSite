@@ -1,5 +1,18 @@
-import { pgTable, uuid, text, timestamp, index } from "drizzle-orm/pg-core";
-import { taskStatusEnum } from "./enums.js";
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  index,
+  pgEnum,
+} from "drizzle-orm/pg-core";
+
+const taskStatusEnum = pgEnum("status", [
+  "PENDING",
+  "PROCESSING",
+  "COMPLETED",
+  "FAILED",
+]);
 
 export const tasks = pgTable(
   "tasks",
