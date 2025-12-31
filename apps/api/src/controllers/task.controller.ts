@@ -13,7 +13,7 @@ export const createTask = async (
     const { url, question } = req.body;
 
     const task = await createTaskService(url, question);
-    return res.status(201).json(task);
+    return res.status(201).json({ taskId: task[0].id });
   } catch (error) {
     next(error);
   }

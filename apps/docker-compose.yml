@@ -13,41 +13,49 @@ services:
   #     - /app/.next
   #   depends_on:
   #     - api
+  #   network:
+  #     - ats-network
 
   api:
     build:
       context: .
       dockerfile: api/Dockerfile
+      target: development
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:pgpassword@localhost:5433/ats
-      - REDIS_URL=redis://localhost:6379
+      - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
+      - REDIS_URL=redis://ats_rd:6379
       - PORT=8000
     volumes:
       - ./api:/app/api
       - ./database:/app/database
     depends_on:
-      - postgres
-      - redis
+      - ats_pg
+      - ats_rd
+    networks:
+      - ats-network
 
   worker:
     build:
       context: .
       dockerfile: worker/Dockerfile
+      target: development
     environment:
-      - DATABASE_URL=postgresql://postgres:pgpassword@localhost:5433/ats
-      - REDIS_URL=redis://localhost:6379
+      - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
+      - REDIS_URL=redis://ats_rd:6379
     volumes:
       - ./worker:/app/worker
       - ./database:/app/database
     depends_on:
-      - postgres
-      - redis
+      - ats_pg
+      - ats_rd
+    networks:
+      - ats-network
 
-  postgres:
+  ats_pg:
     image: postgres:16
-    restart: always
+    # restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=pgpassword
@@ -55,13 +63,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5432:5432"
+    networks:
+      - ats-network
 
-  redis:
+
+  ats_rd:
     image: redis:alpine
-    restart: always
+    # restart: always
     ports:
       - "6379:6379"
+    networks:
+      - ats-network
 
 volumes:
   postgres_data:
+
+networks:
+  ats-network:
+    driver: bridge

@@ -7,8 +7,11 @@ const TASK_QUEUE_NAME = "task-queue";
 new Worker(
   TASK_QUEUE_NAME,
   async (job) => {
-    console.log("jobs from queue: ", job);
-    await processTaskJobs(job.data.id);
+    console.log("jobs from queue ==> ", {
+      name: job.name,
+      data: { id: job.data.id },
+    });
+    // await processTaskJobs(job.data.id);
   },
   {
     connection: redisConnection,

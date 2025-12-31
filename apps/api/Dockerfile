@@ -20,6 +20,21 @@ RUN pnpm install --frozen-lockfile
 WORKDIR /app/api
 RUN pnpm install --frozen-lockfile
 
+
+# Development stage
+FROM base AS development
+WORKDIR /app
+RUN echo "node-linker=hoisted" > .npmrc
+
+COPY --from=deps /app ./
+COPY api ./api
+COPY database ./database
+
+WORKDIR /app/api
+RUN pnpm install
+
+CMD [ "pnpm","dev:watch" ]
+
 # Builder stage
 FROM base AS builder
 WORKDIR /app

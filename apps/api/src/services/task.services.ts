@@ -4,13 +4,12 @@ import { eq } from "drizzle-orm";
 import { addTaskToQueue } from "./queue.service.js";
 
 export const createTaskService = async (url: string, question: string) => {
-  const task: typeof tasks.$inferInsert = {
-    url,
-    question,
-  };
-  await db.insert(tasks).values(task);
+  const task = await db
+    .insert(tasks)
+    .values({ url, question })
+    .returning({ id: tasks.id });
 
-  await addTaskToQueue(task.id!);
+  await addTaskToQueue(task[0].id);
   return task;
 };
 
