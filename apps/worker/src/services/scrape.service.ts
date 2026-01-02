@@ -4,6 +4,7 @@ import * as cheerio from "cheerio";
 
 export const scrapeWebsite = async (url: string): Promise<string> => {
   try {
+    console.log('website url => ', url)
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
 

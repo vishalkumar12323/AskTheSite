@@ -8,81 +8,84 @@ services:
       - "3000:3000"
     environment:
       - API_URL=http://api:8000
+      - WATCHPACK_POLLING=true
     volumes:
-      - ./client:/app
+      - ./web:/app/web
       - /app/web/node_modules
-      - /app/web/.next
-    # depends_on:
-    #   - api
+    depends_on:
+      - api
     networks:
       - ats-network
 
-#   api:
-#     build:
-#       context: ./
-#       dockerfile: api/Dockerfile
-#       target: development
-#     ports:
-#       - "8000:8000"
-#     environment:
-#       - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
-#       - REDIS_URL=redis://ats_rd:6379
-#       - PORT=8000
-#     volumes:
-#       - ./api:/app/api
-#       - ./database:/app/database
-#       - /app/api/node_modules
-#       - /app/database/node_modules
-#     depends_on:
-#       - ats_pg
-#       - ats_rd
-#     networks:
-#       - ats-network
+  api:
+    build:
+      context: ./
+      dockerfile: api/Dockerfile
+      target: development
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
+      - REDIS_URL=redis://ats_rd:6379
+      - PORT=8000
+    volumes:
+      - ./api:/app/api
+      - ./database:/app/database
+      - /app/api/node_modules
+      - /app/database/node_modules
+    depends_on:
+      - ats_pg
+      - ats_rd
+    networks:
+      - ats-network
 
-#   worker:
-#     build:
-#       context: ./
-#       dockerfile: worker/Dockerfile
-#       target: development
-#     environment:
-#       - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
-#       - REDIS_URL=redis://ats_rd:6379
-#     volumes:
-#       - ./worker:/app/worker
-#       - ./database:/app/database
-#       - /app/worker/node_modules
-#       - /app/database/node_modules
-#     depends_on:
-#       - ats_pg
-#       - ats_rd
-#     networks:
-#       - ats-network
+  worker:
+    build:
+      context: ./
+      dockerfile: worker/Dockerfile
+      target: development
+    ipc: host
+    init: true
+    cap_add:
+      - SYS_ADMIN 
+    environment:
+      - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
+      - REDIS_URL=redis://ats_rd:6379
+    volumes:
+      - ./worker:/app/worker
+      - ./database:/app/database
+      - /app/worker/node_modules
+      - /app/database/node_modules
+    depends_on:
+      - ats_pg
+      - ats_rd
+    networks:
+      - ats-network
 
-#   ats_pg:
-#     image: postgres:16
-#     # restart: always
-#     environment:
-#       - POSTGRES_USER=postgres
-#       - POSTGRES_PASSWORD=pgpassword
-#       - POSTGRES_DB=ats
-#     volumes:
-#       - postgres_data:/var/lib/postgresql/data
-#     ports:
-#       - "5432:5432"
-#     networks:
-#       - ats-network
+  ats_pg:
+    image: postgres:16
+    # restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pgpassword
+      - POSTGRES_DB=ats
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ats-network
 
+  ats_rd:
+    image: redis:alpine
+    # restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - ats-network
 
-#   ats_rd:
-#     image: redis:alpine
-#     # restart: always
-#     ports:
-#       - "6379:6379"
-#     networks:
-#       - ats-network
-
-# volumes:
-#   postgres_data:
+volumes:
+  postgres_data:
 
 networks:
   ats-network:

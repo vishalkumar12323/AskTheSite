@@ -11,7 +11,7 @@ new Worker(
       name: job.name,
       data: { id: job.data.id },
     });
-    // await processTaskJobs(job.data.id);
+    await processTaskJobs(job.data.id);
   },
   {
     connection: redisConnection,

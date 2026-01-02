@@ -30,6 +30,7 @@ export const TaskForm = ({
   return (
     <>
       <Input
+        value={url}
         placeholder="www.example.com"
         onChange={(e) => setUrl(e.target.value)}
       />
