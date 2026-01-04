@@ -24,10 +24,9 @@ services:
       target: development
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
-      - REDIS_URL=redis://ats_rd:6379
-      - PORT=8000
+    
+    env_file:
+      - ./api/.env
     volumes:
       - ./api:/app/api
       - ./database:/app/database
@@ -48,10 +47,8 @@ services:
     init: true
     cap_add:
       - SYS_ADMIN 
-    environment:
-      - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
-      - REDIS_URL=redis://ats_rd:6379
-      - GEMINI_API_KEY=AIzaSyBXUL4dEmrJJ5orrfGX4U96NApTX7nJm6w
+    env_file:
+      - ./worker/.env
     volumes:
       - ./worker:/app/worker
       - ./database:/app/database
