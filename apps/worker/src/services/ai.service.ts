@@ -1,10 +1,6 @@
-import OpenAI from "openai";
-import { env } from "../config/env.js";
+import { GoogleGenAI } from "@google/genai";
 
-const client = new OpenAI({
-  apiKey: env.API_KEY,
-  baseURL: env.BASE_URL,
-});
+const ai = new GoogleGenAI({});
 
 export const askAI = async (
   webContent: string,
@@ -21,10 +17,10 @@ export const askAI = async (
         ${question}
     `;
 
-  const response = await client.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.2,
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt
   });
-  return response.choices[0].message.content || "No answer generated.";
+
+  return response.text || "No output generate for this prompt.";
 };

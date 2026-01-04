@@ -4,19 +4,18 @@ import * as cheerio from "cheerio";
 
 export const scrapeWebsite = async (url: string): Promise<string> => {
   try {
-    console.log('website url => ', url)
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
 
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
 
     const content = await page.evaluate(() => {
-      return document.body.innerText;
+      return document.head.title;
     });
 
     await browser.close();
 
-    if (content && content.length > 200) {
+    if (content && content.length > 2000) {
       return content;
     }
 

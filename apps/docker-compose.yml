@@ -51,6 +51,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:pgpassword@ats_pg:5432/ats
       - REDIS_URL=redis://ats_rd:6379
+      - GEMINI_API_KEY=AIzaSyBXUL4dEmrJJ5orrfGX4U96NApTX7nJm6w
     volumes:
       - ./worker:/app/worker
       - ./database:/app/database
