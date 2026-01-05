@@ -18,13 +18,13 @@ export const processTaskJobs = async (taskId: string) => {
     await markProcessing(taskId);
 
     const webContent = await scrapeWebsite(task[0].url);
-    // console.log("webContent: ", webContent);
+    console.log("webContent: ", webContent);
 
-    const aiAns = await askAI(webContent, task[0].question);
+    // const aiAns = await askAI(webContent, task[0].question);
 
     // console.log("answer: ", aiAns);
 
-    await markCompleted(taskId, aiAns);
+    // await markCompleted(taskId, aiAns);
   } catch (error: any) {
     console.error("❌ Job failed:", error);
     await markFailed(taskId, error.message);
