@@ -32,14 +32,10 @@ export const tasks = pg.pgTable(
   })
 );
 
-
-export const tasksRelations = relations(tasks, ({ one }) => ({
+export const taskRelations = relations(tasks, ({one}) => ({
   question: one(question, {
-    fields: [tasks.id],
+    fields: [tasks.questionId],
     references: [question.id]
   }),
-  answer: one(answer, {
-    fields: [tasks.id],
-    references: [answer.id],
-  })
+  answer: one(answer),
 }));

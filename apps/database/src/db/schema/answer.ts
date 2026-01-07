@@ -1,5 +1,6 @@
 import * as pg from "drizzle-orm/pg-core";
 import { tasks } from "./task";
+import { relations } from "drizzle-orm";
 
 export const answer = pg.pgTable("answer", {
     id: pg.uuid("id").defaultRandom().primaryKey(),
@@ -13,3 +14,11 @@ export const answer = pg.pgTable("answer", {
     createdAt: pg.timestamp("created_at", {withTimezone: true}).defaultNow(),
     updatedAt: pg.timestamp("updated_at", {withTimezone: true}).defaultNow(),
 });
+
+export const answersRelations = relations(answer, ({ one }) => ({
+  // Answer belongs to ONE Task
+  task: one(tasks, {
+    fields: [answer.taskId], 
+    references: [tasks.id], 
+  }),
+}));
