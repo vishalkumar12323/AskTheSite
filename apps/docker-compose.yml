@@ -1,21 +1,21 @@
 services:
-  web:
-    build:
-      context: ./
-      dockerfile: web/Dockerfile
-      target: development
-    ports:
-      - "3000:3000"
-    environment:
-      - API_URL=http://api:8000
-      - WATCHPACK_POLLING=true
-    volumes:
-      - ./web:/app/web
-      - /app/web/node_modules
-    depends_on:
-      - api
-    networks:
-      - ats-network
+  # web:
+  #   build:
+  #     context: ./
+  #     dockerfile: web/Dockerfile
+  #     target: development
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - API_URL=http://api:8000
+  #     - WATCHPACK_POLLING=true
+  #   volumes:
+  #     - ./web:/app/web
+  #     - /app/web/node_modules
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - ats-network
 
   api:
     build:
@@ -38,27 +38,27 @@ services:
     networks:
       - ats-network
 
-  worker:
-    build:
-      context: ./
-      dockerfile: worker/Dockerfile
-      target: development
-    ipc: host
-    init: true
-    cap_add:
-      - SYS_ADMIN 
-    env_file:
-      - ./worker/.env
-    volumes:
-      - ./worker:/app/worker
-      - ./database:/app/database
-      - /app/worker/node_modules
-      - /app/database/node_modules
-    depends_on:
-      - ats_pg
-      - ats_rd
-    networks:
-      - ats-network
+  # worker:
+  #   build:
+  #     context: ./
+  #     dockerfile: worker/Dockerfile
+  #     target: development
+  #   ipc: host
+  #   init: true
+  #   cap_add:
+  #     - SYS_ADMIN 
+  #   env_file:
+  #     - ./worker/.env
+  #   volumes:
+  #     - ./worker:/app/worker
+  #     - ./database:/app/database
+  #     - /app/worker/node_modules
+  #     - /app/database/node_modules
+  #   depends_on:
+  #     - ats_pg
+  #     - ats_rd
+  #   networks:
+  #     - ats-network
 
   ats_pg:
     image: postgres:16
@@ -74,13 +74,13 @@ services:
     networks:
       - ats-network
 
-  ats_rd:
-    image: redis:alpine
+  # ats_rd:
+  #   image: redis:alpine
     # restart: always
-    ports:
-      - "6379:6379"
-    networks:
-      - ats-network
+    # ports:
+    #   - "6379:6379"
+    # networks:
+    #   - ats-network
 
 volumes:
   postgres_data:

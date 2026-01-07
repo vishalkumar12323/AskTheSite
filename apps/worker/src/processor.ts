@@ -1,5 +1,5 @@
 import { db } from "../../database/src/index.js";
-import { tasks } from "../../database/src/db/schema.js";
+import { tasks } from "../../database/src/db/schema/task.js";
 import { eq } from "drizzle-orm";
 
 import {
@@ -17,7 +17,7 @@ export const processTaskJobs = async (taskId: string) => {
 
     await markProcessing(taskId);
 
-    const webContent = await scrapeWebsite(task[0].url);
+    const webContent = await scrapeWebsite(task[0].);
     console.log("webContent: ", webContent);
 
     const aiAns = await askAI(webContent, task[0].question);

@@ -7,7 +7,6 @@ export const answer = pg.pgTable("answer", {
     errMessage: pg.text("err_message"),
     websiteUrl: pg.text("website_url"),
     websiteLogo: pg.text("website_logo"),
-    websiteHomeUrl: pg.text("website_home_url"),
     websiteSignupUrl: pg.text("website_signup_url"),
     
     taskId: pg.uuid("task_id").notNull().references(() => tasks.id),

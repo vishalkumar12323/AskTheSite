@@ -1,16 +1,25 @@
-import { tasks } from "../../../database/src/db/schema.js";
+import { question, tasks } from "../../../database/src/db/schema";
 import { db } from "../../../database/src/index.js";
 import { eq } from "drizzle-orm";
 import { addTaskToQueue } from "./queue.service.js";
 
-export const createTaskService = async (url: string, question: string) => {
-  const task = await db
-    .insert(tasks)
-    .values({ url, question })
-    .returning({ id: tasks.id });
+export const createTaskService = async (url: string, qt: string) => {
+  const taskId = await db.transaction(async (tx) => {
+    // Inserting question and returing its id.
+    const [newQuestion] = await tx.insert(question).values({
+      url, question: qt
+    }).returning({id: question.id});
 
-  await addTaskToQueue(task[0].id);
-  return task;
+    const [newTask] = await tx.insert(tasks).values({
+      questionId: newQuestion.id,
+      status: "PENDING",
+    }).returning({id: tasks.id});
+
+    return newTask.id;
+  });
+
+  await addTaskToQueue(taskId);
+  return taskId;
 };
 
 export const getTaskService = async (id: string) => {

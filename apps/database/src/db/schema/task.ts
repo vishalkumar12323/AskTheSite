@@ -17,6 +17,7 @@ export const tasks = pg.pgTable(
     id: pg.uuid("id").defaultRandom().primaryKey(),
     status: taskStatusEnum("status").notNull().default("PENDING"),
 
+    questionId: pg.uuid("question_id").notNull().references(() => question.id),
     createdAt: pg.timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
