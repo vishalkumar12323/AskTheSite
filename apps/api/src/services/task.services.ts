@@ -8,12 +8,12 @@ export const createTaskService = async (url: string, qt: string) => {
     // Inserting question and returing its id.
     const [newQuestion] = await tx.insert(question).values({
       url, question: qt
-    }).returning({id: question.id});
+    }).returning({ id: question.id });
 
     const [newTask] = await tx.insert(tasks).values({
       questionId: newQuestion.id,
       status: "PENDING",
-    }).returning({id: tasks.id});
+    }).returning({ id: tasks.id });
 
     return newTask.id;
   });
@@ -23,7 +23,24 @@ export const createTaskService = async (url: string, qt: string) => {
 };
 
 export const getTaskService = async (id: string) => {
-  const task = await db.select().from(tasks).where(eq(tasks.id, id));
-  if (!task) throw new Error("Task not found");
+  const task = await db.query.tasks.findFirst({
+    where: eq(tasks.id, id),
+    columns: {
+      id: true,
+      status: true,
+      createdAt: true
+    },
+    with: {
+      question: {
+        columns: {
+          id: true,
+          question: true,
+          url: true,
+          createdAt: true
+        }
+      }
+    }
+  });
+
   return task;
 };

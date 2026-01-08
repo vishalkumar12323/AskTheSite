@@ -12,8 +12,8 @@ export const createTask = async (
   try {
     const { url, question } = req.body;
 
-    const task = await createTaskService(url, question);
-    return res.status(201).json({ taskId: task[0].id });
+    const taskId = await createTaskService(url, question);
+    return res.status(201).json({ taskId });
   } catch (error) {
     next(error);
   }
