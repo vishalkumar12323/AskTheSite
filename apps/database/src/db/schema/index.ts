@@ -1,3 +1,3 @@
-export * from "./answer.js";
-export * from "./question.js";
-export * from "./task.js";
+export * from "./answer";
+export * from "./question";
+export * from "./task";

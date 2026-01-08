@@ -1,5 +1,5 @@
 {
-  "id": "f07ef018-88f1-407f-9184-46aee74345a7",
+  "id": "985ef3ed-bdc9-4aad-b187-1d3678175d68",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -35,12 +35,6 @@
         },
         "website_logo": {
           "name": "website_logo",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "website_home_url": {
-          "name": "website_home_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -117,12 +111,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "task_id": {
-          "name": "task_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -153,21 +141,7 @@
           "with": {}
         }
       },
-      "foreignKeys": {
-        "question_task_id_tasks_id_fk": {
-          "name": "question_task_id_tasks_id_fk",
-          "tableFrom": "question",
-          "tableTo": "tasks",
-          "columnsFrom": [
-            "task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -192,6 +166,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'PENDING'"
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -240,7 +220,21 @@
           "with": {}
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "tasks_question_id_question_id_fk": {
+          "name": "tasks_question_id_question_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "question",
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

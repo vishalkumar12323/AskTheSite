@@ -11,5 +11,3 @@ const client = postgres(connectionURI);
 export const db = drizzle(client, {schema})
 
 
-// CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-// CREATE TYPE status AS ENUM ('PENDING','PROCESSING','COMPLETED','FAILED');
