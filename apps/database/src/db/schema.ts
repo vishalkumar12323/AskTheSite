@@ -32,8 +32,8 @@ export const question = pg.pgTable("question", {
     id: pg.uuid("id").defaultRandom().primaryKey(),
     url: pg.text("url").notNull(),
     question: pg.text("question").notNull(),
-    createdAt: pg.timestamp("created_at", {withTimezone: true}),
-    updatedAt: pg.timestamp("updated_at", {withTimezone: true})
+    createdAt: pg.timestamp("created_at", {withTimezone: true}).defaultNow().notNull(),
+    updatedAt: pg.timestamp("updated_at", {withTimezone: true}).defaultNow().notNull()
 }, (t) => ({
     questionIdx: pg.index("question_idx").on(t.question),
 }));
