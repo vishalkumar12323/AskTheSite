@@ -20,4 +20,4 @@ RUN pnpm install
 WORKDIR /app/api
 RUN pnpm install
 
-CMD [ "pnpm", "dev:watch" ]
+CMD [ "pnpm", "start:dev" ]
