@@ -21,6 +21,6 @@ WORKDIR /app/worker
 RUN pnpm install
 
 
-CMD [ "pnpm", "dev:watch" ]
+CMD [ "pnpm", "start:dev" ]
 
 
