@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "playwright/";
 import axios from "axios";
 import * as cheerio from "cheerio";
 

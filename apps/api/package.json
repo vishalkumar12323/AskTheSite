@@ -5,9 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev:watch": "nodemon",
-    "build": "tsc",
-    "start": "node dist/api/src/index.js"
+    "start:dev": "tsx watch src/index.ts",
+    "build": "tsc && tsc-alias",
+    "start:prod": "node build/api/src/index.js"
+  },
+  "_moduleAliases": {
+    "@db": "./build/database/src"
   },
   "keywords": [],
   "author": "",
@@ -20,16 +23,16 @@
     "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
     "ioredis": "^5.8.2",
+    "module-alias": "^2.2.3",
     "postgres": "^3.4.7"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.0.3",
-    "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
-    "ts-node-esm": "^0.0.6",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

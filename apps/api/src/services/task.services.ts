@@ -1,19 +1,18 @@
-import { question, tasks } from "../../../database/src/db/schema";
-import { db } from "../../../database/src/index.js";
+import {answer, question, tasks} from "@db/db/schema.js";
+import {db} from "@db/index.js";
 import { eq } from "drizzle-orm";
 import { addTaskToQueue } from "./queue.service.js";
 
 export const createTaskService = async (url: string, qt: string) => {
-  const taskId = await db.transaction(async (tx) => {
-    // Inserting question and returing its id.
+  const taskId = await db.transaction(async(tx) => {
     const [newQuestion] = await tx.insert(question).values({
-      url, question: qt
-    }).returning({ id: question.id });
+      url,
+      question: qt
+    }).returning({id: question.id});
 
     const [newTask] = await tx.insert(tasks).values({
-      questionId: newQuestion.id,
-      status: "PENDING",
-    }).returning({ id: tasks.id });
+      status: "PENDING", questionId: newQuestion.id
+    }).returning({id: tasks.id});
 
     return newTask.id;
   });
@@ -38,7 +37,8 @@ export const getTaskService = async (id: string) => {
           url: true,
           createdAt: true
         }
-      }
+      },
+      answer: true
     }
   });
 

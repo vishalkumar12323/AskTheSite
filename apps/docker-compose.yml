@@ -17,26 +17,26 @@ services:
   #   networks:
   #     - ats-network
 
-  api:
-    build:
-      context: ./
-      dockerfile: api/Dockerfile
-      target: development
-    ports:
-      - "8000:8000"
+  # api:
+  #   build:
+  #     context: ./
+  #     dockerfile: api/Dockerfile
+  #     target: development
+  #   ports:
+  #     - "8000:8000"
     
-    env_file:
-      - ./api/.env
-    volumes:
-      - ./api:/app/api
-      - ./database:/app/database
-      - /app/api/node_modules
-      - /app/database/node_modules
-    depends_on:
-      - ats_pg
-      - ats_rd
-    networks:
-      - ats-network
+  #   env_file:
+  #     - ./api/.env
+  #   volumes:
+  #     - ./api:/app/api
+  #     - ./database:/app/database
+  #     - /app/api/node_modules
+  #     - /app/database/node_modules
+  #   depends_on:
+  #     - ats_pg
+  #     # - ats_rd
+  #   networks:
+  #     - ats-network
 
   # worker:
   #   build:

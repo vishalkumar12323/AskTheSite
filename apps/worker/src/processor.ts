@@ -1,5 +1,5 @@
-import { db } from "../../database/src/index.js";
-import { tasks } from "../../database/src/db/schema/task.js";
+import { db } from "@db/index.js";
+import { tasks } from "@db/db/schema.js";
 import { eq } from "drizzle-orm";
 
 import {

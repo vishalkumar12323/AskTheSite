@@ -1,7 +1,0 @@
-{
-  "watch": ["src"],
-  "ignore": ["src/**/*.spec.ts"],
-  "ext": "ts, js",
-  "exec": "node --loader ts-node/esm ./src/index.ts",
-  "legacyWatch": true
-}
