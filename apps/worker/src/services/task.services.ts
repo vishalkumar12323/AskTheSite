@@ -1,5 +1,5 @@
-import { db } from "../../../database/src/index.js";
-import { tasks } from "../../../database/src/db/schema.js";
+import { db } from "@db/index.js";
+import { answer, tasks } from "@db/db/schema.js";
 import { eq } from "drizzle-orm";
 
 export const markProcessing = async (taskId: string) => {
@@ -10,15 +10,15 @@ export const markProcessing = async (taskId: string) => {
 };
 
 export const markCompleted = async (taskId: string, aiAnswer: string) => {
-  await db
-    .update(tasks)
-    .set({ status: "COMPLETED", aiAnswer })
-    .where(eq(tasks.id, taskId));
+  await db.transaction(async(tx) => {
+    await tx.update(tasks).set({status: "COMPLETED"}).where(eq(tasks.id, taskId));
+    await tx.insert(answer).values({aiAnswer, taskId});
+  });
 };
 
-export const markFailed = async (taskId: string, errorMessage: string) => {
-  await db
-    .update(tasks)
-    .set({ status: "FAILED", errorMessage })
-    .where(eq(tasks.id, taskId));
+export const markFailed = async (taskId: string, errMessage: string) => {
+  await db.transaction(async(tx) => {
+    await tx.update(tasks).set({status: "FAILED"}).where(eq(tasks.id, taskId));
+    await tx.insert(answer).values({errMessage, taskId});
+  });
 };

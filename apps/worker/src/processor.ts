@@ -1,5 +1,5 @@
-import { db } from "../../database/src/index.js";
-import { tasks } from "../../database/src/db/schema/task.js";
+import { db } from "@db/index.js";
+import { tasks } from "@db/db/schema.js";
 import { eq } from "drizzle-orm";
 
 import {
@@ -12,15 +12,25 @@ import { scrapeWebsite } from "./services/scrape.service.js";
 
 export const processTaskJobs = async (taskId: string) => {
   try {
-    const task = await db.select().from(tasks).where(eq(tasks.id, taskId));
+    const task = await db.query.tasks.findFirst({
+      where: eq(tasks.id, taskId),
+      with: {
+        question: {
+          columns: {
+            url: true,
+            question: true,
+          }
+        }
+      }
+    });
     if (!task) throw new Error("Task not found.");
 
     await markProcessing(taskId);
 
-    const webContent = await scrapeWebsite(task[0].);
+    const webContent = await scrapeWebsite(task.question.url);
     console.log("webContent: ", webContent);
 
-    const aiAns = await askAI(webContent, task[0].question);
+    const aiAns = await askAI(webContent, task.question.question);
 
     // console.log("answer: ", aiAns);
 

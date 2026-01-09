@@ -34,7 +34,7 @@ services:
       - /app/database/node_modules
     depends_on:
       - ats_pg
-      - ats_rd
+      # - ats_rd
     networks:
       - ats-network
 
@@ -74,13 +74,13 @@ services:
     networks:
       - ats-network
 
-  # ats_rd:
-  #   image: redis:alpine
-    # restart: always
-    # ports:
-    #   - "6379:6379"
-    # networks:
-    #   - ats-network
+  ats_rd:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - ats-network
 
 volumes:
   postgres_data:
