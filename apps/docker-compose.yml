@@ -24,7 +24,7 @@ services:
       target: development
     ports:
       - "8000:8000"
-    
+
     env_file:
       - ./api/.env
     volumes:
@@ -70,7 +70,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - ats-network
 
