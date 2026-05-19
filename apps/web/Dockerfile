@@ -4,14 +4,14 @@ WORKDIR /app
 
 RUN npm install -g pnpm@10.25.0
 
-COPY web/package.json web/pnpm-lock.yaml ./web/
+COPY web/package.json web/pnpm-lock.yaml ./
 
 FROM base AS development
 ENV NODE_ENV=development
 
-COPY web ./web
+COPY web ./
 
-WORKDIR /app/web
+WORKDIR /app
 RUN pnpm install
 
 CMD [ "pnpm", "dev" ]
