@@ -14,6 +14,9 @@ export const processTaskJobs = async (taskId: string) => {
   try {
     const task = await db.query.tasks.findFirst({
       where: eq(tasks.id, taskId),
+      columns: {
+        id: true
+      },
       with: {
         question: {
           columns: {
@@ -23,16 +26,14 @@ export const processTaskJobs = async (taskId: string) => {
         }
       }
     });
+
     if (!task) throw new Error("Task not found.");
 
     await markProcessing(taskId);
 
     const webContent = await scrapeWebsite(task.question.url);
-    console.log("webContent: ", webContent);
 
     const aiAns = await askAI(webContent, task.question.question);
-
-    // console.log("answer: ", aiAns);
 
     await markCompleted(taskId, aiAns);
   } catch (error: any) {
