@@ -4,20 +4,17 @@ WORKDIR /app
 
 RUN npm install -g pnpm@10.25.0
 
-COPY api/package.json api/pnpm-lock.yaml ./api/
-COPY database/package.json database/pnpm-lock.yaml  ./database/
-
+# Copy only the API package files so pnpm install works correctly for the API
+COPY api/package.json api/pnpm-lock.yaml ./
 
 FROM base AS development
 ENV NODE_ENV=development
 
-COPY api ./api
-COPY database ./database
+# The source code is mounted via docker-compose volumes, but we copy it for standalone builds
+COPY api ./
 
-WORKDIR /app/database
-RUN pnpm install
-
-WORKDIR /app/api
+# Install dependencies for the API
+WORKDIR /app
 RUN pnpm install
 
 CMD [ "pnpm", "start:dev" ]
