@@ -140,3 +140,7 @@ build
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+
+
+feature_suggestions.md
