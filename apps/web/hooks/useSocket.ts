@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
+type TStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+
 interface TaskUpdate {
-    status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+    status: TStatus;
     stage?: string;
     progress?: number;
     error?: string;
