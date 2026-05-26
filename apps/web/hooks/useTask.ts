@@ -1,7 +1,7 @@
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTaskById } from "@/lib/task.api";
 import { useSocket } from "@/hooks/useSocket";
-import { useEffect } from "react";
 
 export const useTask = (taskId: string) => {
   const queryClient = useQueryClient();
