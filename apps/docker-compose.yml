@@ -13,20 +13,21 @@ services:
     networks:
       - ats-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ats"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ats" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
   ats_rd:
-    image: redis:alpine
+    image: redis/redis-stack:latest
     restart: unless-stopped
     ports:
       - "6379:6379"
+      - "8001:8001"
     networks:
       - ats-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -64,7 +65,7 @@ services:
     ipc: host
     init: true
     cap_add:
-      - SYS_ADMIN 
+      - SYS_ADMIN
     env_file:
       - ./worker/.env
     volumes:
