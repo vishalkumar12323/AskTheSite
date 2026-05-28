@@ -17,7 +17,7 @@ export const createTaskService = async (url: string, qt: string) => {
     return newTask.id;
   });
 
-  // await addTaskToQueue(taskId);
+  await addTaskToQueue(taskId);
   return taskId;
 };
 

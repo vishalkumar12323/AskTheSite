@@ -9,5 +9,5 @@ const server = http.createServer(app);
 setupSocketServer(server);
 
 server.listen(env.PORT, () => {
-  console.log(`API + WebSocket server running on port ${env.PORT}`);
+  console.log(`🎈API + WebSocket server running on port ${env.PORT}`);
 });
