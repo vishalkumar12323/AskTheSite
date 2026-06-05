@@ -1,28 +1,14 @@
-import { chromium } from "playwright";
-import axios from "axios";
-import * as cheerio from "cheerio";
+import { WebScraper } from "../features/web-scraper-tools.js";
 
 export const scrapeWebsite = async (url: string): Promise<string> => {
-  try {
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
+  console.log(`🌐 Starting scrape for: ${url}`);
 
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  const scraper = await WebScraper.create(url);
+  const markdown = scraper.toMarkdown();
 
-    const content = await page.evaluate(() => {
-      return document.head.title;
-    });
+  console.log(
+    `📄 Scraped "${scraper.getTitle()}" — ${markdown.length} chars of structured content`
+  );
 
-    await browser.close();
-
-    if (content && content.length > 2000) {
-      return content;
-    }
-
-    throw new Error("Playwright content too small, fallback to Cheerio");
-  } catch (err) {
-    const { data } = await axios.get(url, { timeout: 15_000 });
-    const $ = cheerio.load(data);
-    return $("body").text();
-  }
+  return markdown;
 };
