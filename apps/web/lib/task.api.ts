@@ -23,6 +23,6 @@ export const createTask = async (
 };
 
 export const getTaskById = async (taskId: string): Promise<Task> => {
-  const { data } = await api.get(`/tasks/:${taskId}`);
+  const { data } = await api.get(`/tasks/${taskId}`);
   return data;
 };
