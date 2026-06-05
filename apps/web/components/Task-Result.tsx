@@ -1,24 +1,24 @@
 "use client";
-
-import { useTask } from "@/hooks/useTask";
+import { useTask } from "@/hooks/useTask"
 
 export function TaskResult({ taskId }: { taskId: string }) {
-  const { data, isLoading } = useTask(taskId);
+  const { liveUpdate, data: task, isLoading } = useTask(taskId);
 
+  console.log({ liveUpdate, task });
   if (isLoading) return <p>Loading task...</p>;
-  if (!data) return null;
+  if (!task) return null;
 
   return (
     <div>
-      <p>Status: {data.status}</p>
+      <p>Status: {liveUpdate?.status}</p>
 
-      {data.status === "PROCESSING" && <p>⏳ Working...</p>}
+      {liveUpdate?.status === "PROCESSING" && <p>⏳ Working...</p>}
 
-      {data.status === "FAILED" && (
-        <p style={{ color: "red" }}>❌ {data.errorMessage}</p>
+      {liveUpdate?.status === "FAILED" && (
+        <p style={{ color: "red" }}>❌ {liveUpdate?.error}</p>
       )}
 
-      {data.status === "COMPLETED" && <pre>{data.aiAnswer}</pre>}
+      {liveUpdate?.status === "COMPLETED" && <pre>{task.aiAnswer}</pre>}
     </div>
   );
 }
