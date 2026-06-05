@@ -27,6 +27,7 @@ export const useSocket = (taskId: string) => {
         });
 
         socket.on("task:update", (data: TaskUpdate) => {
+            console.log("DATA:: ", data);
             setUpdate(data);
         });
 
