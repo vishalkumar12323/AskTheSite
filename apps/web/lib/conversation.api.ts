@@ -1,4 +1,5 @@
 import { api } from "./api";
+import type { TaskStatus } from "./task.types";
 
 export interface Conversation {
   id: string;
@@ -23,7 +24,7 @@ export interface ConversationDetail {
   createdAt: string;
   updatedAt: string;
   messages: Message[];
-  tasks: { id: string; status: string }[];
+  tasks: { id: string; status: TaskStatus }[];
 }
 
 export const createConversation = async (payload: {

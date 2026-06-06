@@ -1,17 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-
-type TStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
-
-interface TaskUpdate {
-    status: TStatus;
-    stage?: string;
-    progress?: number;
-    error?: string;
-    taskId?: string;
-    conversationId?: string;
-    answer?: string;
-}
+import type { TaskUpdate } from "@/lib/task.types";
 
 export const useConversationSocket = (conversationId: string | null) => {
     const socketRef = useRef<Socket | null>(null);

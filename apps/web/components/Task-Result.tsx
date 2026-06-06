@@ -1,5 +1,5 @@
 "use client";
-import { useTask } from "@/hooks/useTask"
+import { useTask } from "@/hooks/useTask";
 
 export function TaskResult({ taskId }: { taskId: string }) {
   const { liveUpdate, data: task, isLoading } = useTask(taskId);
@@ -18,7 +18,7 @@ export function TaskResult({ taskId }: { taskId: string }) {
         <p style={{ color: "red" }}>❌ {liveUpdate?.error}</p>
       )}
 
-      {liveUpdate?.status === "COMPLETED" && <pre>{task.aiAnswer}</pre>}
+      {liveUpdate?.status === "COMPLETED" && <pre>{task.answer?.aiAnswer}</pre>}
     </div>
   );
 }

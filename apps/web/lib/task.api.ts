@@ -1,19 +1,8 @@
 import { api } from "./api";
+import type { CreateTaskPayload, Task } from "./task.types";
 
-export interface CreateTaskPayload {
-  url: string;
-  question: string;
-}
-
-export interface Task {
-  id: string;
-  url: string;
-  question: string;
-  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
-  aiAnswer?: string;
-  errorMessage?: string;
-  createdAt: string;
-}
+// Re-export so existing imports from this file continue to work
+export type { CreateTaskPayload, Task };
 
 export const createTask = async (
   payload: CreateTaskPayload
