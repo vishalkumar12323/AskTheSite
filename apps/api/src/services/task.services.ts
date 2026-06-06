@@ -3,6 +3,7 @@ import { db } from "@db/index.js";
 import { eq } from "drizzle-orm";
 import { addTaskToQueue } from "./queue.service.js";
 
+
 export const createTaskService = async (url: string, qt: string) => {
   const taskId = await db.transaction(async (tx) => {
     const [newQuestion] = await tx.insert(question).values({

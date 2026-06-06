@@ -1,6 +1,7 @@
 import { Server as SocketIOServer } from "socket.io";
 import { Redis } from "ioredis";
 import { env } from "./config/env.js";
+import { getTaskService } from "./services/task.services.js";
 import http from "http"
 
 
@@ -27,15 +28,16 @@ export function setupSocketServer(httpServer: http.Server) {
         // channel is "task:<taskId>", which matches the room name
         io.to(channel).emit("task:update", data);
 
+        // Also emit to the conversation room if provided
+        if (data.conversationId) {
+            io.to(`conversation:${data.conversationId}`).emit("task:update", data);
+        }
+
         // If terminal state, clean up the subscription
         if (data.status === "COMPLETED" || data.status === "FAILED") {
             subscriber.unsubscribe(channel);
             activeSubscriptions.delete(channel);
         }
-    });
-
-    subscriber.on("ready", () => {
-        console.log("✅ Redis PubSub subscriber connected and ready.");
     });
 
     io.on("connection", (socket) => {
@@ -44,22 +46,48 @@ export function setupSocketServer(httpServer: http.Server) {
         socket.on("subscribe", async (taskId: string) => {
             const channel = `task:${taskId}`;
             socket.join(channel);
-            console.log(`[Socket.IO] ${socket.id} joined room ${channel}`);
 
             // Only subscribe to Redis if no one is already listening on this channel
             if (!activeSubscriptions.has(channel)) {
                 activeSubscriptions.add(channel);
                 await subscriber.subscribe(channel);
-                console.log(`[Redis PubSub] Subscribed to ${channel}`);
             }
+
+            // ---- CATCH-UP: Check the current DB state ----
+            // If the worker already finished before we subscribed, the client
+            // would never get an update (Redis Pub/Sub doesn't buffer).
+            // So we check the DB and emit the current status immediately.
+            try {
+                const task = await getTaskService(taskId);
+                if (task) {
+                    socket.emit("task:update", {
+                        status: task.status,
+                        taskId: taskId,
+                        stage: task.status === "COMPLETED" ? "DONE"
+                            : task.status === "FAILED" ? "ERROR"
+                                : "SYNCING",
+                        progress: task.status === "COMPLETED" ? 100
+                            : task.status === "FAILED" ? 0
+                                : 10,
+                        // Include answer data if completed
+                        ...(task.status === "COMPLETED" && task.answer ? {
+                            answer: task.answer.aiAnswer,
+                        } : {}),
+                    });
+                }
+            } catch (err) {
+                console.error(`[Socket.IO] Failed to fetch catch-up status for ${taskId}:`, err);
+            }
+        });
+
+        // Allow subscribing to conversation-level updates
+        socket.on("subscribe:conversation", (conversationId: string) => {
+            socket.join(`conversation:${conversationId}`);
+            console.log(`[Socket.IO] ${socket.id} joined conversation:${conversationId}`);
         });
 
         socket.on("disconnect", () => {
             console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
-            // Socket.IO automatically removes the socket from all rooms on disconnect.
-            // We could clean up Redis subscriptions here, but it's safer to let the
-            // terminal-state handler above do it, since another client might still
-            // be watching the same task.
         });
     });
 
