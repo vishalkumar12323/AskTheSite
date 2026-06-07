@@ -1,4 +1,5 @@
 import { Response, Request, NextFunction } from "express";
+import { logger } from "../logger/logger.js";
 
 export const errorHandler = (
   error: Error,
@@ -6,6 +7,9 @@ export const errorHandler = (
   _res: Response,
   _next: NextFunction
 ) => {
-  console.log("Error:: ", error);
+  logger.error(`Unhandled exception on ${_req.method} ${_req.path}`, error, {
+    method: _req.method,
+    path:   _req.path,
+  });
   return _res.status(500).json({ message: error.message });
 };
