@@ -19,16 +19,17 @@ if (!fs.existsSync(LOG_DIR)) {
 
 const LOG_FILES = {
   API_SERVICE: path.join(LOG_DIR, "api.log"),
-  SYSTEM: path.join(LOG_DIR, "system.log"),
-  ERROR: path.join(LOG_DIR, "error.log"),
-  INFO: path.join(LOG_DIR, "system.log"), // INFO shares the system log
+  WORKER:      path.join(LOG_DIR, "worker.log"),
+  SYSTEM:      path.join(LOG_DIR, "system.log"),
+  ERROR:       path.join(LOG_DIR, "error.log"),
+  INFO:        path.join(LOG_DIR, "system.log"), // INFO shares the system log
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-type LogCategory = "API_SERVICE" | "SYSTEM" | "ERROR" | "INFO";
+type LogCategory = "API_SERVICE" | "WORKER" | "SYSTEM" | "ERROR" | "INFO";
 
 interface LogEntry {
   timestamp: string;
@@ -42,20 +43,22 @@ interface LogEntry {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const C = {
-  reset:  "\x1b[0m",
-  bold:   "\x1b[1m",
-  dim:    "\x1b[2m",
-  cyan:   "\x1b[36m",   // API
-  green:  "\x1b[32m",   // SYSTEM
-  red:    "\x1b[31m",   // ERROR
-  yellow: "\x1b[33m",   // INFO
+  reset:   "\x1b[0m",
+  bold:    "\x1b[1m",
+  dim:     "\x1b[2m",
+  cyan:    "\x1b[36m",   // API
+  magenta: "\x1b[35m",   // WORKER
+  green:   "\x1b[32m",   // SYSTEM
+  red:     "\x1b[31m",   // ERROR
+  yellow:  "\x1b[33m",   // INFO
 };
 
 const CATEGORY_STYLE: Record<LogCategory, { color: string; label: string }> = {
-  API_SERVICE: { color: C.cyan,   label: "API    " },
-  SYSTEM:      { color: C.green,  label: "SYSTEM " },
-  ERROR:       { color: C.red,    label: "ERROR  " },
-  INFO:        { color: C.yellow, label: "INFO   " },
+  API_SERVICE: { color: C.cyan,    label: "API    " },
+  WORKER:      { color: C.magenta, label: "WORKER " },
+  SYSTEM:      { color: C.green,   label: "SYSTEM " },
+  ERROR:       { color: C.red,     label: "ERROR  " },
+  INFO:        { color: C.yellow,  label: "INFO   " },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -109,6 +112,14 @@ export const logger = {
    */
   api(message: string, meta?: Record<string, unknown>): void {
     writeLog("API_SERVICE", message, meta);
+  },
+
+  /**
+   * WORKER logs — BullMQ job lifecycle events (received, stage transitions, complete/fail).
+   * Not actively used by the API service but kept for interface parity.
+   */
+  worker(message: string, meta?: Record<string, unknown>): void {
+    writeLog("WORKER", message, meta);
   },
 
   /**
