@@ -1,14 +1,18 @@
 import { WebScraper } from "../features/web-scraper-tools.js";
+import { logger } from "../logger/logger.js";
 
 export const scrapeWebsite = async (url: string): Promise<string> => {
-  console.log(`🌐 Starting scrape for: ${url}`);
+  logger.worker(`Starting scrape`, { url });
 
   const scraper = await WebScraper.create(url);
   const markdown = scraper.toMarkdown();
 
-  console.log(
-    `📄 Scraped "${scraper.getTitle()}" — ${markdown.length} chars of structured content`
-  );
+  logger.worker(`Scrape complete`, {
+    url,
+    title: scraper.getTitle(),
+    contentLength: `${markdown.length} chars`,
+  });
 
   return markdown;
 };
+

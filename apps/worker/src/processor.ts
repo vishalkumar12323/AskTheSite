@@ -10,7 +10,8 @@ import {
 import { askAI } from "./services/ai.service.js";
 import { scrapeWebsite } from "./services/scrape.service.js";
 
-import { redisConnection } from "./config/redis.js"
+import { redisConnection } from "./config/redis.js";
+import { logger } from "./logger/logger.js";
 
 export const processTaskJobs = async (taskId: string) => {
   try {
@@ -56,7 +57,7 @@ export const processTaskJobs = async (taskId: string) => {
 
       if (conv?.scrapedContent) {
         // Reuse cached content — skip scraping!
-        console.log(`♻️ Reusing cached scraped content for conversation ${conversationId}`);
+        logger.worker(`Reusing cached scraped content`, { taskId, conversationId });
         webContent = conv.scrapedContent;
       } else {
         // First question in this conversation — scrape and cache
@@ -135,7 +136,7 @@ export const processTaskJobs = async (taskId: string) => {
     }));
 
   } catch (error: any) {
-    console.error("❌ Job failed:", error);
+    logger.error(`Job failed`, error, { taskId });
 
     // Attempt to get conversationId for the error event
     let conversationId: string | null = null;
@@ -158,3 +159,4 @@ export const processTaskJobs = async (taskId: string) => {
     throw error;
   }
 };
+

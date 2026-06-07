@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { logger } from "../logger/logger.js";
 
 const ai = new GoogleGenAI({});
 
@@ -32,6 +33,7 @@ ${question}`;
     contents: prompt,
   });
 
-  console.log("AI Answer generation done...");
+  logger.worker(`AI answer generation complete`);
   return response.text ?? "No output generated for this prompt.";
 };
+

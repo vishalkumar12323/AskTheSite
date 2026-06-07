@@ -1,15 +1,17 @@
 import { Worker } from "bullmq";
 import { redisConnection } from "./config/redis.js";
 import { processTaskJobs } from "./processor.js";
+import { logger } from "./logger/logger.js";
 
 const TASK_QUEUE_NAME = "task-queue";
 
 new Worker(
   TASK_QUEUE_NAME,
   async (job) => {
-    console.log("jobs from queue => ", {
+    logger.worker(`Job received from queue`, {
       name: job.name,
-      data: { id: job.data.id },
+      jobId: job.id,
+      taskId: job.data.id,
     });
     await processTaskJobs(job.data.id);
   },
@@ -18,4 +20,5 @@ new Worker(
   }
 );
 
-console.log("Worker running and waiting for jobs...");
+logger.system("Worker started — waiting for jobs", { queue: TASK_QUEUE_NAME });
+

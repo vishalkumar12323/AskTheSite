@@ -2,6 +2,7 @@ import { chromium, type Browser, type Page } from "playwright";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
+import { logger } from "../logger/logger.js";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -120,22 +121,27 @@ class WebScraper {
 
   private async scrape(): Promise<void> {
     try {
-      console.log(`🔍 Scraping (Playwright): ${this.url}`);
+      logger.worker(`Scraping via Playwright`, { url: this.url });
       const html = await this.scrapeWithPlaywright();
       this.extractDataFromHtml(html);
       this.scraped = true;
-      console.log(`✅ Playwright scrape succeeded for ${this.url}`);
+      logger.worker(`Playwright scrape succeeded`, { url: this.url });
     } catch (pwError: any) {
-      console.warn(
-        `⚠️ Playwright failed: ${pwError.message} — falling back to Cheerio`
-      );
+      logger.worker(`Playwright failed — falling back to Cheerio`, {
+        url: this.url,
+        reason: pwError.message,
+      });
       try {
         const html = await this.scrapeWithCheerio();
         this.extractDataFromHtml(html);
         this.scraped = true;
-        console.log(`✅ Cheerio fallback succeeded for ${this.url}`);
+        logger.worker(`Cheerio fallback succeeded`, { url: this.url });
       } catch (cheerioError: any) {
-        console.error(`❌ Both scraping strategies failed for ${this.url}`);
+        logger.error(`Both scraping strategies failed`, cheerioError, {
+          url: this.url,
+          playwrightError: pwError.message,
+          cheerioError: cheerioError.message,
+        });
         throw new Error(
           `Scraping failed for ${this.url}: Playwright(${pwError.message}), Cheerio(${cheerioError.message})`
         );
