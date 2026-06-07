@@ -1,8 +1,6 @@
 // ─── Shared task types ────────────────────────────────────────────
-// These types mirror the actual database schema and API response shapes.
-// Import from here in all hooks and components — do NOT redefine locally.
 
-/** All possible task lifecycle statuses (matches DB enum). */
+/** All possible task lifecycle statuses. */
 export type TaskStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
 
 /** The nested question record embedded inside a Task API response. */
@@ -34,9 +32,7 @@ export interface Task {
   id: string;
   status: TaskStatus;
   createdAt: string;
-  /** The original question linked to this task. */
   question: TaskQuestion;
-  /** The AI answer record — null until the worker marks it COMPLETED/FAILED. */
   answer: TaskAnswer | null;
 }
 
@@ -56,6 +52,5 @@ export interface TaskUpdate {
   error?: string;
   taskId?: string;
   conversationId?: string | null;
-  /** AI answer text — present only when status === "COMPLETED". */
   answer?: string;
 }
