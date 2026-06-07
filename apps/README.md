@@ -23,6 +23,8 @@
 
     🐳 Dockerized for development & production
 
+    📋 Centralized structured logging (API Service, SYSTEM, Error, Worker)
+
 ## 🏗️ Tech Stack
 
 ### Frontend
@@ -150,3 +152,60 @@
     Drizzle ORM → type-safe, SQL-first approach
 
     Docker multi-stage builds → fast dev, small prod images
+
+    Centralized logging → structured JSON logs per service, no scattered console.log
+
+## 📋 Logging Architecture
+
+    Both the API and Worker services share an identical logger singleton
+    (src/logger/logger.ts) that writes to stdout (colored) and to disk (JSONL).
+    No third-party logging library is required.
+
+### Log Categories
+
+    | Category      | Color   | When Used                                              | Disk File         |
+    | ------------- | ------- | ------------------------------------------------------ | ----------------- |
+    | `API_SERVICE` | Cyan    | Every HTTP request → and response ←, with timing       | logs/api.log      |
+    | `WORKER`      | Magenta | BullMQ job lifecycle: received, scrape, AI, complete   | logs/worker.log   |
+    | `SYSTEM`      | Green   | Server start, Redis PubSub events, Socket.IO connect   | logs/system.log   |
+    | `ERROR`       | Red     | Caught exceptions — includes full stack trace          | logs/error.log    |
+    | `INFO`        | Yellow  | General-purpose informational messages                 | logs/system.log   |
+
+### Disk Log Structure
+
+    apps/api/logs/
+    ├── api.log       # HTTP request & response lines (JSONL)
+    ├── worker.log    # BullMQ job events (JSONL)
+    ├── system.log    # Server/Redis/Socket.IO lifecycle (JSONL)
+    └── error.log     # Caught exceptions with stack traces (JSONL)
+
+    apps/worker/logs/
+    ├── worker.log    # Scrape + AI + job events (JSONL)
+    ├── system.log    # Worker startup events (JSONL)
+    └── error.log     # Scrape failures, job failures (JSONL)
+
+    Note: All logs/ directories are git-ignored.
+
+### Example Terminal Output
+
+    2026-06-07T08:30:00Z [SYSTEM ] API + WebSocket server started          { port: 4000 }
+    2026-06-07T08:30:01Z [SYSTEM ] Worker started — waiting for jobs       { queue: 'task-queue' }
+    2026-06-07T08:31:05Z [API   ] → POST /api/conversations                { ip: '::1', ua: 'Mozilla/5.0' }
+    2026-06-07T08:31:05Z [API   ] ← POST /api/conversations 201  43ms
+    2026-06-07T08:31:06Z [WORKER ] Job received from queue                 { taskId: 'abc-123' }
+    2026-06-07T08:31:06Z [WORKER ] Scraping via Playwright                 { url: 'https://example.com' }
+    2026-06-07T08:31:09Z [WORKER ] Playwright scrape succeeded             { url: 'https://example.com' }
+    2026-06-07T08:31:10Z [WORKER ] AI answer generation complete
+    2026-06-07T08:31:10Z [SYSTEM ] [Redis PubSub] task:abc-123            { status: 'COMPLETED' }
+    2026-06-07T08:31:10Z [SYSTEM ] [Socket.IO] Client connected            { socketId: 'xYz1' }
+    2026-06-07T08:32:00Z [ERROR  ] Job failed                              { taskId: 'xyz', stack: '...' }
+
+### Logger API
+
+    import { logger } from "./logger/logger.js";
+
+    logger.api("message", meta?)      // HTTP tracking — used by requestLogger middleware
+    logger.worker("message", meta?)   // BullMQ job events
+    logger.system("message", meta?)   // Infrastructure checkpoints
+    logger.error("message", error?, meta?)  // Caught exceptions (auto-extracts stack)
+    logger.info("message", meta?)     // General-purpose
