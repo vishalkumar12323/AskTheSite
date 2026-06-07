@@ -103,8 +103,7 @@ export const processTaskJobs = async (taskId: string) => {
     }
 
     // ─── AI answer generation ───────────────────────────────────
-    const aiAns = await askAI(webContent, task.question.question, previousMessages);
-
+    // Publish AI_THINKING BEFORE calling askAI so the UI reflects the correct stage
     await redisConnection.publish(`task:${taskId}`, JSON.stringify({
       status: "PROCESSING",
       stage: "AI_THINKING",
@@ -113,12 +112,22 @@ export const processTaskJobs = async (taskId: string) => {
       conversationId,
     }));
 
+    const aiAns = await askAI(webContent, task.question.question, previousMessages);
+
     // ─── Save results ───────────────────────────────────────────
+    await redisConnection.publish(`task:${taskId}`, JSON.stringify({
+      status: "PROCESSING",
+      stage: "GENERATING",
+      progress: 90,
+      taskId,
+      conversationId,
+    }));
+
     await markCompleted(taskId, aiAns, conversationId ?? undefined);
 
     await redisConnection.publish(`task:${taskId}`, JSON.stringify({
       status: "COMPLETED",
-      stage: "GENERATING",
+      stage: "DONE",
       progress: 100,
       taskId,
       conversationId,
