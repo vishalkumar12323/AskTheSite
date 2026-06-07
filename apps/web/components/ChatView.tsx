@@ -39,10 +39,10 @@ export function ChatView({
   return (
     <div className="flex flex-col h-full">
       {/* Chat Header */}
-      <header className="px-6 py-4 border-b border-white/[0.06] glass">
+      <header className="px-6 py-4 border-b border-white/6 glass">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6c63ff]/20 to-[#22d3ee]/20 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-linear-to-br from-[#6c63ff]/20 to-[#22d3ee]/20 flex items-center justify-center">
               <Globe className="w-4 h-4 text-[#6c63ff]" />
             </div>
             <div>
@@ -63,7 +63,7 @@ export function ChatView({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#555570] bg-white/[0.04] px-2.5 py-1 rounded-full">
+            <span className="text-xs text-[#555570] bg-white/4 px-2.5 py-1 rounded-full">
               {conversation.messages.length} messages
             </span>
           </div>
@@ -91,7 +91,7 @@ export function ChatView({
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-white/[0.06]">
+      <div className="px-6 py-4 border-t border-white/6">
         <div className="max-w-3xl mx-auto">
           <ChatInput
             onSend={onSendFollowUp}

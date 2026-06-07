@@ -63,7 +63,7 @@ export function ChatInput({
           id="send-button"
           onClick={handleSubmit}
           disabled={!message.trim() || isLoading || disabled}
-          className="p-2.5 rounded-xl bg-gradient-to-r from-[#6c63ff] to-[#5a52e0] text-white disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-200 hover:shadow-lg hover:shadow-[#6c63ff]/20 shrink-0 cursor-pointer"
+          className="p-2.5 rounded-xl bg-linear-to-r from-[#6c63ff] to-[#5a52e0] text-white disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-200 hover:shadow-lg hover:shadow-[#6c63ff]/20 shrink-0 cursor-pointer"
         >
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />

@@ -61,14 +61,13 @@ export function ChatMessage({ message, index }: ChatMessageProps) {
 
   return (
     <div
-      className={`flex gap-3 animate-fade-in-up ${
-        isUser ? "justify-end" : "justify-start"
-      }`}
+      className={`flex gap-3 animate-fade-in-up ${isUser ? "justify-end" : "justify-start"
+        }`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
       {/* Avatar — assistant only */}
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#22d3ee] flex items-center justify-center shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#6c63ff] to-[#22d3ee] flex items-center justify-center shrink-0 mt-1">
           <Bot className="w-4 h-4 text-white" />
         </div>
       )}
@@ -108,7 +107,7 @@ export function ChatMessage({ message, index }: ChatMessageProps) {
 
       {/* Avatar — user only */}
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#a78bfa] flex items-center justify-center shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#6c63ff] to-[#a78bfa] flex items-center justify-center shrink-0 mt-1">
           <User className="w-4 h-4 text-white" />
         </div>
       )}
@@ -128,7 +127,7 @@ export function TypingIndicator({ stage }: { stage?: string }) {
 
   return (
     <div className="flex gap-3 justify-start animate-fade-in-up">
-      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6c63ff] to-[#22d3ee] flex items-center justify-center shrink-0 mt-1">
+      <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#6c63ff] to-[#22d3ee] flex items-center justify-center shrink-0 mt-1">
         <Bot className="w-4 h-4 text-white" />
       </div>
       <div className="chat-message-assistant px-4 py-3">

@@ -40,9 +40,9 @@ export function NewConversationDialog({
   return (
     <div className="flex flex-col items-center justify-center h-full px-6">
       <div className="max-w-lg w-full animate-fade-in-up">
-        {/* Logo & Title */}
+
         <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#6c63ff] to-[#22d3ee] flex items-center justify-center mx-auto mb-5 shadow-lg shadow-[#6c63ff]/20">
+          <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-[#6c63ff] to-[#22d3ee] flex items-center justify-center mx-auto mb-5 shadow-lg shadow-[#6c63ff]/20">
             <Globe className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold gradient-text mb-2">
@@ -53,9 +53,9 @@ export function NewConversationDialog({
           </p>
         </div>
 
-        {/* Form Card */}
+
         <div className="glass rounded-2xl p-6 space-y-5">
-          {/* URL Input */}
+
           <div className="space-y-2">
             <label htmlFor="url-input" className="text-xs font-medium text-[#8888a0] uppercase tracking-wider">
               Website URL
@@ -71,18 +71,17 @@ export function NewConversationDialog({
                 placeholder="https://example.com"
                 disabled={isLoading}
                 autoFocus
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-10 pr-4 py-3 text-sm text-[#e8e8ed] placeholder:text-[#555570] outline-none focus:border-[#6c63ff]/50 focus:ring-1 focus:ring-[#6c63ff]/20 transition-all duration-200"
+                className="w-full bg-white/4 border border-white/8 rounded-xl pl-10 pr-4 py-3 text-sm text-[#e8e8ed] placeholder:text-[#555570] outline-none focus:border-[#6c63ff]/50 focus:ring-1 focus:ring-[#6c63ff]/20 transition-all duration-200"
               />
             </div>
           </div>
 
           {/* Question Input — revealed after URL */}
           <div
-            className={`space-y-2 transition-all duration-300 ${
-              step === "url"
+            className={`space-y-2 transition-all duration-300 ${step === "url"
                 ? "opacity-40 pointer-events-none"
                 : "opacity-100"
-            }`}
+              }`}
           >
             <label htmlFor="question-input" className="text-xs font-medium text-[#8888a0] uppercase tracking-wider">
               Your Question
@@ -95,7 +94,7 @@ export function NewConversationDialog({
               placeholder="What does this website do? What are its pricing plans?"
               disabled={isLoading || step === "url"}
               rows={3}
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-[#e8e8ed] placeholder:text-[#555570] outline-none resize-none focus:border-[#6c63ff]/50 focus:ring-1 focus:ring-[#6c63ff]/20 transition-all duration-200"
+              className="w-full bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-[#e8e8ed] placeholder:text-[#555570] outline-none resize-none focus:border-[#6c63ff]/50 focus:ring-1 focus:ring-[#6c63ff]/20 transition-all duration-200"
             />
           </div>
 
@@ -105,7 +104,7 @@ export function NewConversationDialog({
               id="next-step-button"
               onClick={handleUrlNext}
               disabled={!url.trim()}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#6c63ff] to-[#5a52e0] text-white text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-200 hover:shadow-lg hover:shadow-[#6c63ff]/20 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-linear-to-r from-[#6c63ff] to-[#5a52e0] text-white text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-200 hover:shadow-lg hover:shadow-[#6c63ff]/20 cursor-pointer"
             >
               Continue
               <ArrowRight className="w-4 h-4" />
@@ -115,7 +114,7 @@ export function NewConversationDialog({
               id="submit-button"
               onClick={handleSubmit}
               disabled={!url.trim() || !question.trim() || isLoading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#6c63ff] to-[#5a52e0] text-white text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-200 hover:shadow-lg hover:shadow-[#6c63ff]/20 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-linear-to-r from-[#6c63ff] to-[#5a52e0] text-white text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-200 hover:shadow-lg hover:shadow-[#6c63ff]/20 cursor-pointer"
             >
               {isLoading ? (
                 <>
