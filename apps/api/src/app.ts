@@ -4,9 +4,13 @@ import cors from "cors";
 import taskRoutes from "./routes/task.routes.js";
 import conversationRoutes from "./routes/conversation.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import { requestLogger } from "./middlewares/requestLogger.middleware.js";
 
 const app = express();
 
+// requestLogger must be the FIRST middleware so it sees every request,
+// including those that fail before reaching a controller.
+app.use(requestLogger);
 app.use(cors());
 app.use(express.json());
 

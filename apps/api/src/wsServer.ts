@@ -2,7 +2,8 @@ import { Server as SocketIOServer } from "socket.io";
 import { Redis } from "ioredis";
 import { env } from "./config/env.js";
 import { getTaskService } from "./services/task.services.js";
-import http from "http"
+import http from "http";
+import { logger } from "./logger/logger.js";
 
 
 // Single shared Redis subscriber for all socket connections.
@@ -24,7 +25,7 @@ export function setupSocketServer(httpServer: http.Server) {
     // to the correct Socket.IO room.
     subscriber.on("message", (channel, message) => {
         const data = JSON.parse(message);
-        console.log(`[Redis PubSub] ${channel}:`, data);
+        logger.system(`[Redis PubSub] ${channel}`, { status: data.status, conversationId: data.conversationId });
         // channel is "task:<taskId>", which matches the room name
         io.to(channel).emit("task:update", data);
 
@@ -41,7 +42,7 @@ export function setupSocketServer(httpServer: http.Server) {
     });
 
     io.on("connection", (socket) => {
-        console.log(`[Socket.IO] Client connected: ${socket.id}`);
+        logger.system(`[Socket.IO] Client connected`, { socketId: socket.id });
 
         socket.on("subscribe", async (taskId: string) => {
             const channel = `task:${taskId}`;
@@ -76,18 +77,18 @@ export function setupSocketServer(httpServer: http.Server) {
                     });
                 }
             } catch (err) {
-                console.error(`[Socket.IO] Failed to fetch catch-up status for ${taskId}:`, err);
+                logger.error(`[Socket.IO] Failed to fetch catch-up status for ${taskId}`, err, { socketId: socket.id, taskId });
             }
         });
 
         // Allow subscribing to conversation-level updates
         socket.on("subscribe:conversation", (conversationId: string) => {
             socket.join(`conversation:${conversationId}`);
-            console.log(`[Socket.IO] ${socket.id} joined conversation:${conversationId}`);
+            logger.system(`[Socket.IO] Client joined conversation room`, { socketId: socket.id, conversationId });
         });
 
         socket.on("disconnect", () => {
-            console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
+            logger.system(`[Socket.IO] Client disconnected`, { socketId: socket.id });
         });
     });
 
