@@ -24,3 +24,19 @@ COPY api ./
 RUN pnpm install
 
 CMD [ "pnpm", "start:dev" ]
+
+
+FROM base AS runner
+ENV NODE_ENV=production
+
+WORKDIR /database
+COPY database/ ./
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app
+COPY api/ ./
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm build
+
+CMD [ "node", "build/api/src/index.js" ]
