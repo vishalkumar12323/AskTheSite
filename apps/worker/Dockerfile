@@ -24,3 +24,19 @@ COPY worker ./
 RUN pnpm install
 
 CMD [ "pnpm", "start:dev" ]
+
+
+FROM base AS runner
+ENV NODE_ENV=production
+
+WORKDIR /database
+COPY database/ ./
+
+RUN pnpm install --frozen-lockfile
+WORKDIR /app
+
+COPY worker/ ./
+RUN pnpm install --frozen-lockfile
+RUN pnpm builds
+
+CMD [ "node", "build/worker/src/index.js" ]
