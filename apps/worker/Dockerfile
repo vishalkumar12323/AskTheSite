@@ -37,6 +37,6 @@ WORKDIR /app
 
 COPY worker/ ./
 RUN pnpm install --frozen-lockfile
-RUN pnpm builds
+RUN pnpm build
 
 CMD [ "node", "build/worker/src/index.js" ]
