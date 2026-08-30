@@ -2,6 +2,7 @@
 
 import * as cdk from "aws-cdk-lib";
 import { NetworkStack } from "../lib/network-stack";
+import { DatabaseStack } from "../lib/database-stack";
 
 const app = new cdk.App();
 
@@ -10,8 +11,29 @@ const env = {
     region: process.env.CDK_DEFAULT_REGION
 };
 
-new NetworkStack(app, "AskTheSite-NetworkStack", {
+/* 
+======================
+ Network Stack
+======================
+*/
+const networkStack = new NetworkStack(app, "AskTheSite-NetworkStack", {
     stackName: "AskTheSite-NetworkStack",
     env,
     description: "Network infrastructure for AskTheSite"
 });
+
+
+/* 
+======================
+ Database Stack
+======================
+*/
+
+const databaseStack = new DatabaseStack(app, "AskTheSite-DatabaseStack", {
+    env,
+    stackName: "AskTheSite-DatabaseStack",
+    description: "PostgreSQL Database infrastructure for AskTheSite",
+    vpc: networkStack.vpc
+});
+
+databaseStack.addStackDependency(networkStack);
