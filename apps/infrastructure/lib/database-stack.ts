@@ -56,6 +56,7 @@ export class DatabaseStack extends cdk.Stack {
 
             deletionProtection: false,
             removalPolicy: cdk.RemovalPolicy.SNAPSHOT,
+            storageEncrypted: true
         });
 
 
