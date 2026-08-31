@@ -3,6 +3,7 @@
 import * as cdk from "aws-cdk-lib";
 import { NetworkStack } from "../lib/network-stack";
 import { DatabaseStack } from "../lib/database-stack";
+import { CacheStack } from "../lib/cache-stack";
 
 const app = new cdk.App();
 
@@ -37,3 +38,19 @@ const databaseStack = new DatabaseStack(app, "AskTheSite-DatabaseStack", {
 });
 
 databaseStack.addStackDependency(networkStack);
+
+
+/* 
+======================
+ ElastiCache Stack
+======================
+*/
+
+const cacheStack = new CacheStack(app, "AskTheSite-CacheStack", {
+    env,
+    vpc: networkStack.vpc,
+    stackName: "AskTheSite-CacheStack",
+    description: "ElastiCache infrastructure for AskTheSite"
+});
+
+cacheStack.addStackDependency(networkStack);
