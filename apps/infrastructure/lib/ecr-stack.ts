@@ -51,17 +51,17 @@ export class EcrStack extends cdk.Stack {
 
         // Output
 
-        new cdk.CfnOutput(this, "ApiRepository", {
+        new cdk.CfnOutput(this, "ApiRepositoryUri", {
             value: this.apiRepository.repositoryUri,
             description: "ECR repository URI for the API service"
         });
 
-        new cdk.CfnOutput(this, "WebRepository", {
+        new cdk.CfnOutput(this, "WebRepositoryUri", {
             value: this.webRepository.repositoryUri,
             description: "ECR repository URI for the WEB service"
         });
 
-        new cdk.CfnOutput(this, "WorkerRepository", {
+        new cdk.CfnOutput(this, "WorkerRepositoryUri", {
             value: this.workerRepository.repositoryUri,
             description: "ECR repository URI for the WORKER service"
         });
