@@ -64,21 +64,23 @@ cacheStack.addStackDependency(networkStack);
 ======================
 */
 
-new EcrStack(app, "AskTheSite-EcrStack", {
+const ecrStack = new EcrStack(app, "AskTheSite-EcrStack", {
     env
 });
 
 
-
-
 /* 
 ======================
- ECR Stack
+ ECS Stack
 ======================
 */
 const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
     env,
-    vpc: networkStack.vpc
+    vpc: networkStack.vpc,
+
+    apiRepository: ecrStack.apiRepository,
+    webRepository: ecrStack.webRepository,
+    workerRepository: ecrStack.workerRepository
 });
 
 ecsStack.addStackDependency(networkStack);
