@@ -63,6 +63,6 @@ cacheStack.addStackDependency(networkStack);
 ======================
 */
 
-const ecrStack = new EcrStack(app, "AskTheSite-EcrStack", {
+new EcrStack(app, "AskTheSite-EcrStack", {
     env
 });
