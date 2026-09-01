@@ -4,7 +4,8 @@ import * as cdk from "aws-cdk-lib";
 import { NetworkStack } from "../lib/network-stack";
 import { DatabaseStack } from "../lib/database-stack";
 import { CacheStack } from "../lib/cache-stack";
-import { EcrStack } from "../lib/ecr-stack"
+import { EcrStack } from "../lib/ecr-stack";
+import { EcsStack } from "../lib/ecs-stack";
 
 const app = new cdk.App();
 
@@ -66,3 +67,18 @@ cacheStack.addStackDependency(networkStack);
 new EcrStack(app, "AskTheSite-EcrStack", {
     env
 });
+
+
+
+
+/* 
+======================
+ ECR Stack
+======================
+*/
+const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
+    env,
+    vpc: networkStack.vpc
+});
+
+ecsStack.addStackDependency(networkStack);
