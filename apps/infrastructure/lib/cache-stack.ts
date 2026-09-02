@@ -9,12 +9,13 @@ interface CacheStackProps extends cdk.StackProps {
 
 export class CacheStack extends cdk.Stack {
     public readonly cache: elasticache.CfnServerlessCache;
+    public readonly elastiCacheSecurityGroup: ec2.SecurityGroup;
 
     constructor(scope: Construct, id: string, props: CacheStackProps) {
         super(scope, id, props);
 
         // Security Group
-        const cacheSecurityGroup = new ec2.SecurityGroup(this, "CacheSecurityGroup", {
+        this.elastiCacheSecurityGroup = new ec2.SecurityGroup(this, "CacheSecurityGroup", {
             vpc: props.vpc,
             description: "SecurityGroup for AskTheSite ElastiCache",
             allowAllOutbound: true
@@ -30,7 +31,7 @@ export class CacheStack extends cdk.Stack {
             }).subnetIds,
 
             securityGroupIds: [
-                cacheSecurityGroup.securityGroupId
+                this.elastiCacheSecurityGroup.securityGroupId
             ],
         });
 
@@ -46,7 +47,7 @@ export class CacheStack extends cdk.Stack {
         });
 
         new cdk.CfnOutput(this, "CacheSecurityGroupId", {
-            value: cacheSecurityGroup.securityGroupId,
+            value: this.elastiCacheSecurityGroup.securityGroupId,
             description: "ElastiCache security Group ID"
         });
     };
