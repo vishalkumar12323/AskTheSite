@@ -80,7 +80,9 @@ const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
 
     apiRepository: ecrStack.apiRepository,
     webRepository: ecrStack.webRepository,
-    workerRepository: ecrStack.workerRepository
+    workerRepository: ecrStack.workerRepository,
+    databaseSecurityGroup: databaseStack.databaseSecurityGroup,
+    elastiCacheSecurityGroup: cacheStack.elastiCacheSecurityGroup
 });
 
 ecsStack.addStackDependency(networkStack);
