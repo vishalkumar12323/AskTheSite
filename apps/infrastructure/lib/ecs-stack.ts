@@ -12,6 +12,9 @@ interface EcsStackProps extends cdk.StackProps {
     apiRepository: ecr.Repository;
     webRepository: ecr.Repository;
     workerRepository: ecr.Repository;
+
+    databaseSecurityGroup: ec2.SecurityGroup;
+    elastiCacheSecurityGroup: ec2.SecurityGroup;
 }
 
 export class EcsStack extends cdk.Stack {
@@ -21,6 +24,7 @@ export class EcsStack extends cdk.Stack {
     public readonly taskRole: iam.Role;
 
     public readonly ecsSecurityGroup: ec2.SecurityGroup;
+    public readonly albSecurityGroup: ec2.SecurityGroup;
 
 
     constructor(scope: Construct, id: string, props: EcsStackProps) {
@@ -45,6 +49,7 @@ export class EcsStack extends cdk.Stack {
             assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
         });
 
+        // Security Group for ECS Task.
         this.ecsSecurityGroup = new ec2.SecurityGroup(this, "EcsSecurityGroup", {
             vpc: props.vpc,
             securityGroupName: "askthesite-ecs-sg",
@@ -52,6 +57,46 @@ export class EcsStack extends cdk.Stack {
             allowAllOutbound: true
         });
 
+        // Security Group for ALB
+        this.albSecurityGroup = new ec2.SecurityGroup(this, "AlbSecurityGroup", {
+            vpc: props.vpc,
+            securityGroupName: "askthsite-alb-sg",
+            description: "Security group for AskTheSite Application Load Balancer",
+            allowAllOutbound: true
+        });
+        this.albSecurityGroup.addIngressRule(
+            ec2.Peer.anyIpv4(),
+            ec2.Port.tcp(80),
+            "Allow Http traffic from the internet"
+        );
+
+
+        // Allow ALB SG -> ECS Web Container
+        this.ecsSecurityGroup.addIngressRule(
+            this.albSecurityGroup,
+            ec2.Port.tcp(3000),
+            "Allow ALB to reach Web container"
+        );
+
+        // Allow ALB SG -> ECS API Container
+        this.ecsSecurityGroup.addIngressRule(
+            this.albSecurityGroup,
+            ec2.Port.tcp(3001),
+            "Allow ALB to reach API container"
+        );
+
+
+        props.databaseSecurityGroup.addIngressRule(
+            this.ecsSecurityGroup,
+            ec2.Port.tcp(5432),
+            "Allow ECS to Access PostgreSQL"
+        );
+
+        props.elastiCacheSecurityGroup.addIngressRule(
+            this.ecsSecurityGroup,
+            ec2.Port.tcp(6379),
+            "Allow ECS to access Redis"
+        );
 
         // API LogGroup
         const apiLogGroup = new logs.LogGroup(this, "ApiLogGroup", {
