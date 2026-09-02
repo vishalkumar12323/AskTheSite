@@ -20,6 +20,9 @@ export class EcsStack extends cdk.Stack {
     public readonly executionRole: iam.Role;
     public readonly taskRole: iam.Role;
 
+    public readonly ecsSecurityGroup: ec2.SecurityGroup;
+
+
     constructor(scope: Construct, id: string, props: EcsStackProps) {
         super(scope, id, props);
 
@@ -41,6 +44,14 @@ export class EcsStack extends cdk.Stack {
             roleName: "askthesite-ecs-task-role",
             assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
         });
+
+        this.ecsSecurityGroup = new ec2.SecurityGroup(this, "EcsSecurityGroup", {
+            vpc: props.vpc,
+            securityGroupName: "askthesite-ecs-sg",
+            description: "Security Group for the AskThesite ECS task",
+            allowAllOutbound: true
+        });
+
 
         // API LogGroup
         const apiLogGroup = new logs.LogGroup(this, "ApiLogGroup", {
