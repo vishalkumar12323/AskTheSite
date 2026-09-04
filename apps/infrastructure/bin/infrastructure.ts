@@ -6,6 +6,7 @@ import { DatabaseStack } from "../lib/database-stack";
 import { CacheStack } from "../lib/cache-stack";
 import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
+import { SecretStack } from "../lib/secrets-stack";
 
 const app = new cdk.App();
 
@@ -23,6 +24,18 @@ const networkStack = new NetworkStack(app, "AskTheSite-NetworkStack", {
     stackName: "AskTheSite-NetworkStack",
     env,
     description: "Network infrastructure for AskTheSite"
+});
+
+
+/* 
+======================
+ SECRET manager Stack
+======================
+*/
+const secretsStack = new SecretStack(app, "AskTheSite-SecretsStack", {
+    env,
+    stackName: "AskTheSite-SecretsStack",
+    description: "Secret Manager resources for AskTheSite"
 });
 
 
@@ -82,7 +95,10 @@ const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
     webRepository: ecrStack.webRepository,
     workerRepository: ecrStack.workerRepository,
     databaseSecurityGroup: databaseStack.databaseSecurityGroup,
-    elastiCacheSecurityGroup: cacheStack.elastiCacheSecurityGroup
+    elastiCacheSecurityGroup: cacheStack.elastiCacheSecurityGroup,
+
+    googleAIApiKeySecret: secretsStack.googleAIApiKeySecret
 });
 
 ecsStack.addStackDependency(networkStack);
+ecsStack.addStackDependency(secretsStack);
