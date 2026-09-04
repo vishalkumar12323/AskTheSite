@@ -97,7 +97,10 @@ const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
     databaseSecurityGroup: databaseStack.databaseSecurityGroup,
     elastiCacheSecurityGroup: cacheStack.elastiCacheSecurityGroup,
 
-    googleAIApiKeySecret: secretsStack.googleAIApiKeySecret
+    googleAIApiKeySecret: secretsStack.googleAIApiKeySecret,
+    databaseSecret: databaseStack.databaseSecret,
+    cacheEndpoint: cacheStack.cacheEndpoint,
+    cachePort: cacheStack.cachePort,
 });
 
 ecsStack.addStackDependency(networkStack);
