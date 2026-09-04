@@ -95,7 +95,7 @@ export class EcsStack extends cdk.Stack {
         props.elastiCacheSecurityGroup.addIngressRule(
             this.ecsSecurityGroup,
             ec2.Port.tcp(6379),
-            "Allow ECS to access Redis"
+            "Allow ECS to access Valkey"
         );
 
         // API LogGroup
