@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as rds from "aws-cdk-lib/aws-rds";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 interface DatabaseStackProps extends cdk.StackProps {
     vpc: ec2.Vpc;
@@ -10,6 +11,8 @@ interface DatabaseStackProps extends cdk.StackProps {
 export class DatabaseStack extends cdk.Stack {
     public readonly database: rds.DatabaseInstance;
     public readonly databaseSecurityGroup: ec2.SecurityGroup;
+
+    public readonly databaseSecret: secretsmanager.ISecret;
 
 
     constructor(scope: Construct, id: string, props: DatabaseStackProps) {
@@ -58,6 +61,8 @@ export class DatabaseStack extends cdk.Stack {
             removalPolicy: cdk.RemovalPolicy.SNAPSHOT,
             storageEncrypted: true
         });
+
+        this.databaseSecret = this.database.secret!
 
 
         // Outputs

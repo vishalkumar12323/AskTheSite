@@ -11,6 +11,9 @@ export class CacheStack extends cdk.Stack {
     public readonly cache: elasticache.CfnServerlessCache;
     public readonly elastiCacheSecurityGroup: ec2.SecurityGroup;
 
+    public readonly cacheEndpoint: string;
+    public readonly cachePort: string;
+
     constructor(scope: Construct, id: string, props: CacheStackProps) {
         super(scope, id, props);
 
@@ -34,6 +37,9 @@ export class CacheStack extends cdk.Stack {
                 this.elastiCacheSecurityGroup.securityGroupId
             ],
         });
+
+        this.cacheEndpoint = this.cache.attrEndpointAddress;
+        this.cachePort = this.cache.attrEndpointPort;
 
         // Outputs
         new cdk.CfnOutput(this, "CacheEndpoint", {
