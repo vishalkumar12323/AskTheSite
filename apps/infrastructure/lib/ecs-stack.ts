@@ -5,6 +5,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 interface EcsStackProps extends cdk.StackProps {
     vpc: ec2.Vpc;
@@ -15,6 +16,13 @@ interface EcsStackProps extends cdk.StackProps {
 
     databaseSecurityGroup: ec2.SecurityGroup;
     elastiCacheSecurityGroup: ec2.SecurityGroup;
+
+    googleAIApiKeySecret: secretsmanager.ISecret;
+
+    databaseSecret: secretsmanager.ISecret;
+
+    cacheEndpoint: string;
+    cachePort: string;
 }
 
 export class EcsStack extends cdk.Stack {
@@ -112,7 +120,7 @@ export class EcsStack extends cdk.Stack {
             memoryLimitMiB: 512,
 
             executionRole: this.executionRole,
-            taskRole: this.taskRole
+            taskRole: this.taskRole,
         });
 
         apiTaskDefinition.addContainer("ApiContainer", {
@@ -123,7 +131,30 @@ export class EcsStack extends cdk.Stack {
             }),
             environment: {
                 NODE_ENV: "production",
-                PORT: "3001"
+                PORT: "3001",
+                REDIS_URL: `redis://:${props.cacheEndpoint}:${props.cachePort}`
+            },
+            secrets: {
+                DB_HOST: ecs.Secret.fromSecretsManager(
+                    props.databaseSecret,
+                    "host"
+                ),
+                DB_PORT: ecs.Secret.fromSecretsManager(
+                    props.databaseSecret,
+                    "port"
+                ),
+                DB_USER: ecs.Secret.fromSecretsManager(
+                    props.databaseSecret,
+                    "username"
+                ),
+                DB_PASSWORD: ecs.Secret.fromSecretsManager(
+                    props.databaseSecret,
+                    "password"
+                ),
+                DB_NAME: ecs.Secret.fromSecretsManager(
+                    props.databaseSecret,
+                    "dbname"
+                ),
             }
         }).addPortMappings({
             containerPort: 3001,
@@ -189,6 +220,12 @@ export class EcsStack extends cdk.Stack {
             }),
             environment: {
                 NODE_ENV: "production",
+                REDIS_URL: `redis://${props.cacheEndpoint}:${props.cachePort}`
+            },
+            secrets: {
+                GEMINI_API_KEY: ecs.Secret.fromSecretsManager(
+                    props.googleAIApiKeySecret
+                )
             }
         });
 
