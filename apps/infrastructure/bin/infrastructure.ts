@@ -2,6 +2,7 @@
 
 import * as cdk from "aws-cdk-lib";
 import { NetworkStack } from "../lib/network-stack";
+import { SecurityGroupsStack } from "../lib/security-groups-stack";
 import { DatabaseStack } from "../lib/database-stack";
 import { CacheStack } from "../lib/cache-stack";
 import { EcrStack } from "../lib/ecr-stack";
@@ -41,6 +42,24 @@ const secretsStack = new SecretStack(app, "AskTheSite-SecretsStack", {
 
 /* 
 ======================
+ Security Groups Stack
+======================
+ All security groups live here so that inter-SG ingress rules are
+ same-stack references. This prevents the cross-stack dependency cycle
+ that would otherwise arise between DatabaseStack and EcsStack.
+*/
+const securityGroupsStack = new SecurityGroupsStack(app, "AskTheSite-SecurityGroupsStack", {
+    env,
+    vpc: networkStack.vpc,
+    stackName: "AskTheSite-SecurityGroupsStack",
+    description: "Security Groups for AskTheSite (DB, Cache, ECS, ALB)"
+});
+
+securityGroupsStack.addStackDependency(networkStack);
+
+
+/* 
+======================
  Database Stack
 ======================
 */
@@ -49,10 +68,12 @@ const databaseStack = new DatabaseStack(app, "AskTheSite-DatabaseStack", {
     env,
     stackName: "AskTheSite-DatabaseStack",
     description: "PostgreSQL Database infrastructure for AskTheSite",
-    vpc: networkStack.vpc
+    vpc: networkStack.vpc,
+    databaseSecurityGroup: securityGroupsStack.databaseSecurityGroup,
 });
 
 databaseStack.addStackDependency(networkStack);
+databaseStack.addStackDependency(securityGroupsStack);
 
 
 /* 
@@ -64,11 +85,13 @@ databaseStack.addStackDependency(networkStack);
 const cacheStack = new CacheStack(app, "AskTheSite-CacheStack", {
     env,
     vpc: networkStack.vpc,
+    elastiCacheSecurityGroup: securityGroupsStack.elastiCacheSecurityGroup,
     stackName: "AskTheSite-CacheStack",
     description: "ElastiCache infrastructure for AskTheSite"
 });
 
 cacheStack.addStackDependency(networkStack);
+cacheStack.addStackDependency(securityGroupsStack);
 
 
 /* 
@@ -94,14 +117,20 @@ const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
     apiRepository: ecrStack.apiRepository,
     webRepository: ecrStack.webRepository,
     workerRepository: ecrStack.workerRepository,
-    databaseSecurityGroup: databaseStack.databaseSecurityGroup,
-    elastiCacheSecurityGroup: cacheStack.elastiCacheSecurityGroup,
+
+    // SGs come from SecurityGroupsStack – no reference to Database/Cache stacks for SGs
+    ecsSecurityGroup: securityGroupsStack.ecsSecurityGroup,
+    albSecurityGroup: securityGroupsStack.albSecurityGroup,
 
     googleAIApiKeySecret: secretsStack.googleAIApiKeySecret,
-    databaseSecret: databaseStack.databaseSecret,
+    databaseSecret: databaseStack.databaseSecret,   // EcsStack → DatabaseStack (one-way, no cycle)
+
     cacheEndpoint: cacheStack.cacheEndpoint,
     cachePort: cacheStack.cachePort,
 });
 
 ecsStack.addStackDependency(networkStack);
 ecsStack.addStackDependency(secretsStack);
+ecsStack.addStackDependency(securityGroupsStack);
+ecsStack.addStackDependency(databaseStack);
+ecsStack.addStackDependency(cacheStack);
