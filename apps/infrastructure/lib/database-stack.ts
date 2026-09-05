@@ -6,6 +6,8 @@ import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 interface DatabaseStackProps extends cdk.StackProps {
     vpc: ec2.Vpc;
+    /** Pre-created SG from SecurityGroupsStack – avoids cross-stack SG cycles. */
+    databaseSecurityGroup: ec2.SecurityGroup;
 }
 
 export class DatabaseStack extends cdk.Stack {
@@ -18,16 +20,9 @@ export class DatabaseStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: DatabaseStackProps) {
         super(scope, id, props);
 
-        // Security Group for PostgreSQL
-        this.databaseSecurityGroup = new ec2.SecurityGroup(
-            this,
-            'DatabaseSecurityGroup',
-            {
-                vpc: props.vpc,
-                description: 'Security group for AskTheSite PostgreSQL database',
-                allowAllOutbound: true,
-            }
-        );
+        // Security Group is created in SecurityGroupsStack to prevent
+        // cross-stack SG reference cycles.
+        this.databaseSecurityGroup = props.databaseSecurityGroup;
 
         this.database = new rds.DatabaseInstance(this, "PostgresDatabase", {
             vpc: props.vpc,
@@ -55,11 +50,11 @@ export class DatabaseStack extends cdk.Stack {
 
             multiAz: false,
             publiclyAccessible: false,
-            backupRetention: cdk.Duration.days(7),
+            backupRetention: cdk.Duration.days(0), // Free Tier: automated backups must be disabled (max = 0)
 
             deletionProtection: false,
             removalPolicy: cdk.RemovalPolicy.SNAPSHOT,
-            storageEncrypted: true
+            storageEncrypted: false // Free Tier: storage encryption is not supported
         });
 
         this.databaseSecret = this.database.secret!
