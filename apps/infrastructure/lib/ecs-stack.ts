@@ -14,8 +14,9 @@ interface EcsStackProps extends cdk.StackProps {
     webRepository: ecr.Repository;
     workerRepository: ecr.Repository;
 
-    databaseSecurityGroup: ec2.SecurityGroup;
-    elastiCacheSecurityGroup: ec2.SecurityGroup;
+    /** Pre-created SGs from SecurityGroupsStack – avoids cross-stack SG cycles. */
+    ecsSecurityGroup: ec2.SecurityGroup;
+    albSecurityGroup: ec2.SecurityGroup;
 
     googleAIApiKeySecret: secretsmanager.ISecret;
 
@@ -61,54 +62,12 @@ export class EcsStack extends cdk.Stack {
             assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com')
         });
 
-        // Security Group for ECS Task.
-        this.ecsSecurityGroup = new ec2.SecurityGroup(this, "EcsSecurityGroup", {
-            vpc: props.vpc,
-            securityGroupName: "askthesite-ecs-sg",
-            description: "Security Group for the AskThesite ECS task",
-            allowAllOutbound: true
-        });
+        // Security Groups are created in SecurityGroupsStack to prevent
+        // cross-stack SG reference cycles. All ingress rules between SGs
+        // are also configured there.
+        this.ecsSecurityGroup = props.ecsSecurityGroup;
+        this.albSecurityGroup = props.albSecurityGroup;
 
-        // Security Group for ALB
-        this.albSecurityGroup = new ec2.SecurityGroup(this, "AlbSecurityGroup", {
-            vpc: props.vpc,
-            securityGroupName: "askthsite-alb-sg",
-            description: "Security group for AskTheSite Application Load Balancer",
-            allowAllOutbound: true
-        });
-        this.albSecurityGroup.addIngressRule(
-            ec2.Peer.anyIpv4(),
-            ec2.Port.tcp(80),
-            "Allow Http traffic from the internet"
-        );
-
-
-        // Allow ALB SG -> ECS Web Container
-        this.ecsSecurityGroup.addIngressRule(
-            this.albSecurityGroup,
-            ec2.Port.tcp(3000),
-            "Allow ALB to reach Web container"
-        );
-
-        // Allow ALB SG -> ECS API Container
-        this.ecsSecurityGroup.addIngressRule(
-            this.albSecurityGroup,
-            ec2.Port.tcp(3001),
-            "Allow ALB to reach API container"
-        );
-
-
-        props.databaseSecurityGroup.addIngressRule(
-            this.ecsSecurityGroup,
-            ec2.Port.tcp(5432),
-            "Allow ECS to Access PostgreSQL"
-        );
-
-        props.elastiCacheSecurityGroup.addIngressRule(
-            this.ecsSecurityGroup,
-            ec2.Port.tcp(6379),
-            "Allow ECS to access Valkey"
-        );
 
         // ----------------------------------------------------------------
         // Configuration for API Service
