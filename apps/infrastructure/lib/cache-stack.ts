@@ -5,6 +5,8 @@ import * as elasticache from "aws-cdk-lib/aws-elasticache";
 
 interface CacheStackProps extends cdk.StackProps {
     vpc: ec2.Vpc;
+    /** Pre-created SG from SecurityGroupsStack – avoids cross-stack SG cycles. */
+    elastiCacheSecurityGroup: ec2.SecurityGroup;
 };
 
 export class CacheStack extends cdk.Stack {
@@ -17,12 +19,9 @@ export class CacheStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: CacheStackProps) {
         super(scope, id, props);
 
-        // Security Group
-        this.elastiCacheSecurityGroup = new ec2.SecurityGroup(this, "CacheSecurityGroup", {
-            vpc: props.vpc,
-            description: "SecurityGroup for AskTheSite ElastiCache",
-            allowAllOutbound: true
-        });
+        // Security Group is created in SecurityGroupsStack to prevent
+        // cross-stack SG reference cycles.
+        this.elastiCacheSecurityGroup = props.elastiCacheSecurityGroup;
 
         // Serverless ElastiCache
         this.cache = new elasticache.CfnServerlessCache(this, "RedisCache", {
