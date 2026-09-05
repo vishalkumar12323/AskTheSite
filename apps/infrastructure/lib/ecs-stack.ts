@@ -34,6 +34,10 @@ export class EcsStack extends cdk.Stack {
     public readonly ecsSecurityGroup: ec2.SecurityGroup;
     public readonly albSecurityGroup: ec2.SecurityGroup;
 
+    public readonly apiTaskDefinition: ecs.FargateTaskDefinition;
+    public readonly webTaskDefinition: ecs.FargateTaskDefinition;
+    public readonly workerTaskDefinition: ecs.FargateTaskDefinition;
+
 
     constructor(scope: Construct, id: string, props: EcsStackProps) {
         super(scope, id, props);
@@ -114,7 +118,7 @@ export class EcsStack extends cdk.Stack {
         });
 
         // API Task Definition
-        const apiTaskDefinition = new ecs.FargateTaskDefinition(this, "ApiTaskDefinition", {
+        this.apiTaskDefinition = new ecs.FargateTaskDefinition(this, "ApiTaskDefinition", {
             family: "askthesite-api",
             cpu: 256,
             memoryLimitMiB: 512,
@@ -123,7 +127,7 @@ export class EcsStack extends cdk.Stack {
             taskRole: this.taskRole,
         });
 
-        apiTaskDefinition.addContainer("ApiContainer", {
+        this.apiTaskDefinition.addContainer("ApiContainer", {
             image: ecs.ContainerImage.fromEcrRepository(props.apiRepository, "v1"),
             logging: ecs.LogDrivers.awsLogs({
                 streamPrefix: "api",
@@ -170,7 +174,7 @@ export class EcsStack extends cdk.Stack {
         });
 
         // WebTaskDefinition
-        const webTaskDefinition = new ecs.FargateTaskDefinition(this, "WebTaskDefinition", {
+        this.webTaskDefinition = new ecs.FargateTaskDefinition(this, "WebTaskDefinition", {
             family: "askthesite-web",
             cpu: 256,
             memoryLimitMiB: 512,
@@ -179,7 +183,7 @@ export class EcsStack extends cdk.Stack {
             taskRole: this.taskRole
         });
 
-        webTaskDefinition.addContainer("WebContainer", {
+        this.webTaskDefinition.addContainer("WebContainer", {
             image: ecs.ContainerImage.fromEcrRepository(props.webRepository, "v1"),
             logging: ecs.LogDrivers.awsLogs({
                 streamPrefix: "web",
@@ -203,7 +207,7 @@ export class EcsStack extends cdk.Stack {
         });
 
         // WorkerTaskDefinition
-        const workerTaskDefinition = new ecs.FargateTaskDefinition(this, "WorkerTaskDefinition", {
+        this.workerTaskDefinition = new ecs.FargateTaskDefinition(this, "WorkerTaskDefinition", {
             family: "askthesite-worker",
             cpu: 256,
             memoryLimitMiB: 512,
@@ -212,7 +216,7 @@ export class EcsStack extends cdk.Stack {
             taskRole: this.taskRole
         });
 
-        workerTaskDefinition.addContainer("WorkerContainer", {
+        this.workerTaskDefinition.addContainer("WorkerContainer", {
             image: ecs.ContainerImage.fromEcrRepository(props.workerRepository, "v1"),
             logging: ecs.LogDrivers.awsLogs({
                 streamPrefix: "worker",
