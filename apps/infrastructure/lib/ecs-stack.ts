@@ -110,6 +110,8 @@ export class EcsStack extends cdk.Stack {
             "Allow ECS to access Valkey"
         );
 
+        // ----------------------------------------------------------------
+        // Configuration for API Service
         // API LogGroup
         const apiLogGroup = new logs.LogGroup(this, "ApiLogGroup", {
             logGroupName: "/ecs/askthesite/api",
@@ -165,7 +167,29 @@ export class EcsStack extends cdk.Stack {
             protocol: ecs.Protocol.TCP
         });
 
+        // API Service
+        const apiService = new ecs.FargateService(this, "ApiService", {
+            serviceName: "askthesite-api-service",
+            cluster: this.cluster,
+            taskDefinition: this.apiTaskDefinition,
 
+            desiredCount: 1,
+            assignPublicIp: false,
+
+            securityGroups: [
+                this.ecsSecurityGroup
+            ],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+            },
+
+            platformVersion: ecs.FargatePlatformVersion.LATEST
+        });
+
+
+
+        // ----------------------------------------------------------------
+        // Configuration for WEB Service
         // WEB LogGroup
         const webLogGroup = new logs.LogGroup(this, "WebLogGroup", {
             logGroupName: "/ecs/askthesite/web",
@@ -198,7 +222,28 @@ export class EcsStack extends cdk.Stack {
             protocol: ecs.Protocol.TCP
         });
 
+        // WEB Service
+        const webService = new ecs.FargateService(this, "WebService", {
+            serviceName: "askthesite-web-service",
+            cluster: this.cluster,
+            taskDefinition: this.webTaskDefinition,
 
+            desiredCount: 1,
+            assignPublicIp: false,
+
+            securityGroups: [
+                this.ecsSecurityGroup
+            ],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+            },
+
+            platformVersion: ecs.FargatePlatformVersion.LATEST
+        });
+
+
+        // ----------------------------------------------------------------
+        // Configuration for WORKER Service
         // WORKER LogGroup
         const workerLogGroup = new logs.LogGroup(this, "WorkerLogGroup", {
             logGroupName: "/ecs/askthesite/worker",
@@ -233,6 +278,25 @@ export class EcsStack extends cdk.Stack {
             }
         });
 
+        // WORKER Service
+        const workerService = new ecs.FargateService(this, "WorkerService", {
+            serviceName: "askthesite-worker-service",
+            cluster: this.cluster,
+            taskDefinition: this.workerTaskDefinition,
+
+            desiredCount: 1,
+            assignPublicIp: false,
+
+            securityGroups: [
+                this.ecsSecurityGroup
+            ],
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+            },
+
+            platformVersion: ecs.FargatePlatformVersion.LATEST
+        });
+
 
 
         // Outputs
@@ -252,6 +316,21 @@ export class EcsStack extends cdk.Stack {
 
         new cdk.CfnOutput(this, 'TaskRoleArn', {
             value: this.taskRole.roleArn,
+        });
+
+        new cdk.CfnOutput(this, "ApiServiceName", {
+            value: apiService.serviceName,
+            description: "AskTheSite API ECS service"
+        });
+
+        new cdk.CfnOutput(this, "WebServiceName", {
+            value: webService.serviceName,
+            description: "AskTheSite Web ECS service"
+        });
+
+        new cdk.CfnOutput(this, "WorkerServiceName", {
+            value: workerService.serviceName,
+            description: "AskTheSite Worker ECS service"
         });
     }
 };
