@@ -1,4 +1,4 @@
-FROM node:trixie-slim AS base
+FROM node:22-alpine AS base
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ COPY web/ ./
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
