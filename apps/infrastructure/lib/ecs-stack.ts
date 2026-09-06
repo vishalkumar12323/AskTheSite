@@ -6,6 +6,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2"
 
 interface EcsStackProps extends cdk.StackProps {
     vpc: ec2.Vpc;
@@ -42,6 +43,8 @@ export class EcsStack extends cdk.Stack {
     public readonly apiService: ecs.FargateService;
     public readonly webService: ecs.FargateService;
     public readonly workerService: ecs.FargateService;
+
+    public readonly loadBalancer: elbv2.ApplicationLoadBalancer;
 
 
     constructor(scope: Construct, id: string, props: EcsStackProps) {
@@ -260,6 +263,19 @@ export class EcsStack extends cdk.Stack {
             platformVersion: ecs.FargatePlatformVersion.LATEST
         });
 
+
+        // ----------------------------------------------------------------
+        // Application Load Balancer
+        this.loadBalancer = new elbv2.ApplicationLoadBalancer(this, "AskThesiteALB", {
+            loadBalancerName: "askthesite-alb",
+            vpc: props.vpc,
+            internetFacing: true,
+
+            securityGroup: this.albSecurityGroup,
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PUBLIC
+            }
+        });
 
 
         // Outputs
