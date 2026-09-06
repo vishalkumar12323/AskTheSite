@@ -322,6 +322,24 @@ export class EcsStack extends cdk.Stack {
         this.apiService.attachToApplicationTargetGroup(apiTargetGroup);
         this.webService.attachToApplicationTargetGroup(webTargetGroup);
 
+        // Create HTTP Listener
+        const httpListener = this.loadBalancer.addListener("HttpListener", {
+            port: 80,
+            open: false,
+            protocol: elbv2.ApplicationProtocol.HTTP,
+            defaultTargetGroups: [webTargetGroup],
+        });
+
+        // Add API path-based routing
+        httpListener.addTargetGroups("ApiPathRule", {
+            priority: 10,
+            conditions: [
+                elbv2.ListenerCondition.pathPatterns([
+                    "/api/*"
+                ])
+            ],
+            targetGroups: [apiTargetGroup]
+        })
 
         // Outputs
         new cdk.CfnOutput(this, "ClusterName", {
@@ -355,6 +373,17 @@ export class EcsStack extends cdk.Stack {
         new cdk.CfnOutput(this, "WorkerServiceName", {
             value: this.workerService.serviceName,
             description: "AskTheSite Worker ECS service"
+        });
+
+        // ALB Outputs
+        new cdk.CfnOutput(this, "AlbDNSName", {
+            value: this.loadBalancer.loadBalancerDnsName,
+            description: "AskTheSite Application Load Balancer DNS name"
+        });
+
+        new cdk.CfnOutput(this, "AlbArn", {
+            value: this.loadBalancer.loadBalancerArn,
+            description: "AskTheSite Application Load Balancer Arn"
         });
     }
 };
