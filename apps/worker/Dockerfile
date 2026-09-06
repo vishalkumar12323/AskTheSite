@@ -18,7 +18,7 @@ RUN pnpm install
 
 # The source code is mounted via docker-compose volumes, but we copy it for standalone builds
 WORKDIR /app
-COPY worker ./
+COPY worker/ ./
 
 # Install dependencies for the worker
 RUN pnpm install
