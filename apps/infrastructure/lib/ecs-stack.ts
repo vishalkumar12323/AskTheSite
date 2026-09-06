@@ -6,7 +6,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
-import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2"
 
 interface EcsStackProps extends cdk.StackProps {
     vpc: ec2.Vpc;
@@ -17,7 +16,6 @@ interface EcsStackProps extends cdk.StackProps {
 
     /** Pre-created SGs from SecurityGroupsStack – avoids cross-stack SG cycles. */
     ecsSecurityGroup: ec2.SecurityGroup;
-    albSecurityGroup: ec2.SecurityGroup;
 
     googleAIApiKeySecret: secretsmanager.ISecret;
 
@@ -34,7 +32,6 @@ export class EcsStack extends cdk.Stack {
     public readonly taskRole: iam.Role;
 
     public readonly ecsSecurityGroup: ec2.SecurityGroup;
-    public readonly albSecurityGroup: ec2.SecurityGroup;
 
     public readonly apiTaskDefinition: ecs.FargateTaskDefinition;
     public readonly webTaskDefinition: ecs.FargateTaskDefinition;
@@ -43,8 +40,6 @@ export class EcsStack extends cdk.Stack {
     public readonly apiService: ecs.FargateService;
     public readonly webService: ecs.FargateService;
     public readonly workerService: ecs.FargateService;
-
-    public readonly loadBalancer: elbv2.ApplicationLoadBalancer;
 
 
     constructor(scope: Construct, id: string, props: EcsStackProps) {
@@ -73,7 +68,6 @@ export class EcsStack extends cdk.Stack {
         // cross-stack SG reference cycles. All ingress rules between SGs
         // are also configured there.
         this.ecsSecurityGroup = props.ecsSecurityGroup;
-        this.albSecurityGroup = props.albSecurityGroup;
 
 
         // ----------------------------------------------------------------
@@ -264,83 +258,6 @@ export class EcsStack extends cdk.Stack {
         });
 
 
-        // ----------------------------------------------------------------
-        // Application Load Balancer
-        this.loadBalancer = new elbv2.ApplicationLoadBalancer(this, "AskThesiteALB", {
-            loadBalancerName: "askthesite-alb",
-            vpc: props.vpc,
-            internetFacing: true,
-
-            securityGroup: this.albSecurityGroup,
-            vpcSubnets: {
-                subnetType: ec2.SubnetType.PUBLIC
-            }
-        });
-
-        // API Service Target Group
-        const apiTargetGroup = new elbv2.ApplicationTargetGroup(this, "ApiTargetGroup", {
-            vpc: props.vpc,
-            port: 3001,
-            protocol: elbv2.ApplicationProtocol.HTTP,
-            targetType: elbv2.TargetType.IP,
-
-            healthCheck: {
-                path: "/api/v1/health",
-                protocol: elbv2.Protocol.HTTP,
-                port: "3001",
-                healthyHttpCodes: "200-399",
-
-                interval: cdk.Duration.seconds(30),
-                timeout: cdk.Duration.seconds(5),
-                healthyThresholdCount: 2,
-                unhealthyThresholdCount: 3
-            }
-        });
-
-        // WEB Service Target Group
-        const webTargetGroup = new elbv2.ApplicationTargetGroup(this, "WebTargetGroup", {
-            vpc: props.vpc,
-            port: 3000,
-            protocol: elbv2.ApplicationProtocol.HTTP,
-            targetType: elbv2.TargetType.IP,
-
-
-            healthCheck: {
-                path: "/",
-                protocol: elbv2.Protocol.HTTP,
-                port: "3000",
-                healthyHttpCodes: "200-399",
-
-                interval: cdk.Duration.seconds(30),
-                timeout: cdk.Duration.seconds(5),
-                healthyThresholdCount: 2,
-                unhealthyThresholdCount: 3
-            }
-        });
-
-        // Attaching ECS Services to target groups
-        this.apiService.attachToApplicationTargetGroup(apiTargetGroup);
-        this.webService.attachToApplicationTargetGroup(webTargetGroup);
-
-        // Create HTTP Listener
-        const httpListener = this.loadBalancer.addListener("HttpListener", {
-            port: 80,
-            open: false,
-            protocol: elbv2.ApplicationProtocol.HTTP,
-            defaultTargetGroups: [webTargetGroup],
-        });
-
-        // Add API path-based routing
-        httpListener.addTargetGroups("ApiPathRule", {
-            priority: 10,
-            conditions: [
-                elbv2.ListenerCondition.pathPatterns([
-                    "/api/*"
-                ])
-            ],
-            targetGroups: [apiTargetGroup]
-        })
-
         // Outputs
         new cdk.CfnOutput(this, "ClusterName", {
             value: this.cluster.clusterName,
@@ -373,17 +290,6 @@ export class EcsStack extends cdk.Stack {
         new cdk.CfnOutput(this, "WorkerServiceName", {
             value: this.workerService.serviceName,
             description: "AskTheSite Worker ECS service"
-        });
-
-        // ALB Outputs
-        new cdk.CfnOutput(this, "AlbDNSName", {
-            value: this.loadBalancer.loadBalancerDnsName,
-            description: "AskTheSite Application Load Balancer DNS name"
-        });
-
-        new cdk.CfnOutput(this, "AlbArn", {
-            value: this.loadBalancer.loadBalancerArn,
-            description: "AskTheSite Application Load Balancer Arn"
         });
     }
 };
