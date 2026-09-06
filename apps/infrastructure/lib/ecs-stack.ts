@@ -277,6 +277,51 @@ export class EcsStack extends cdk.Stack {
             }
         });
 
+        // API Service Target Group
+        const apiTargetGroup = new elbv2.ApplicationTargetGroup(this, "ApiTargetGroup", {
+            vpc: props.vpc,
+            port: 3001,
+            protocol: elbv2.ApplicationProtocol.HTTP,
+            targetType: elbv2.TargetType.IP,
+
+            healthCheck: {
+                path: "/api/v1/health",
+                protocol: elbv2.Protocol.HTTP,
+                port: "3001",
+                healthyHttpCodes: "200-399",
+
+                interval: cdk.Duration.seconds(30),
+                timeout: cdk.Duration.seconds(5),
+                healthyThresholdCount: 2,
+                unhealthyThresholdCount: 3
+            }
+        });
+
+        // WEB Service Target Group
+        const webTargetGroup = new elbv2.ApplicationTargetGroup(this, "WebTargetGroup", {
+            vpc: props.vpc,
+            port: 3000,
+            protocol: elbv2.ApplicationProtocol.HTTP,
+            targetType: elbv2.TargetType.IP,
+
+
+            healthCheck: {
+                path: "/",
+                protocol: elbv2.Protocol.HTTP,
+                port: "3000",
+                healthyHttpCodes: "200-399",
+
+                interval: cdk.Duration.seconds(30),
+                timeout: cdk.Duration.seconds(5),
+                healthyThresholdCount: 2,
+                unhealthyThresholdCount: 3
+            }
+        });
+
+        // Attaching ECS Services to target groups
+        this.apiService.attachToApplicationTargetGroup(apiTargetGroup);
+        this.webService.attachToApplicationTargetGroup(webTargetGroup);
+
 
         // Outputs
         new cdk.CfnOutput(this, "ClusterName", {
