@@ -8,6 +8,7 @@ import { CacheStack } from "../lib/cache-stack";
 import { EcrStack } from "../lib/ecr-stack";
 import { EcsStack } from "../lib/ecs-stack";
 import { SecretStack } from "../lib/secrets-stack";
+import { AlbStack } from "../lib/alb-stack";
 
 const app = new cdk.App();
 
@@ -120,7 +121,6 @@ const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
 
     // SGs come from SecurityGroupsStack – no reference to Database/Cache stacks for SGs
     ecsSecurityGroup: securityGroupsStack.ecsSecurityGroup,
-    albSecurityGroup: securityGroupsStack.albSecurityGroup,
 
     googleAIApiKeySecret: secretsStack.googleAIApiKeySecret,
     databaseSecret: databaseStack.databaseSecret,   // EcsStack → DatabaseStack (one-way, no cycle)
@@ -134,3 +134,20 @@ ecsStack.addStackDependency(secretsStack);
 ecsStack.addStackDependency(securityGroupsStack);
 ecsStack.addStackDependency(databaseStack);
 ecsStack.addStackDependency(cacheStack);
+
+
+/* 
+======================
+Application Load Balancer Stack
+======================
+*/
+const albStack = new AlbStack(app, "AskTheSite-AlbStack", {
+    env,
+    vpc: networkStack.vpc,
+    albSecurityGroup: securityGroupsStack.albSecurityGroup,
+    apiService: ecsStack.apiService,
+    webService: ecsStack.webService
+});
+
+albStack.addStackDependency(networkStack);
+albStack.addStackDependency(securityGroupsStack);
