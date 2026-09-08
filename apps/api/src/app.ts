@@ -19,8 +19,8 @@ app.use("/api/conversations", conversationRoutes);
 
 app.use(errorHandler);
 
-app.get("/", (_req, res) => {
-  res.status(200).json({ msg: "api server successfully running..." });
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ msg: "api server successfully running...", host: req.hostname, currentTime: new Date().toISOString() });
 });
 
 export { app };
