@@ -9,10 +9,12 @@ COPY web/package.json web/pnpm-lock.yaml ./
 FROM base AS development
 ENV NODE_ENV=development
 
-COPY web ./
+COPY web/ ./
 
 WORKDIR /app
 RUN pnpm install
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD --no-verbose --tries=1, quiet --output-document=/dev/null "http://localhost:${PORT:-3000}/" || exit 1
 
 CMD [ "pnpm", "dev" ]
 
@@ -32,5 +34,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD --no-verbose --tries=1, quiet --output-document=/dev/null "http://localhost:${PORT:-3000}/" || exit 1
 
 CMD [ "node", "server.js" ]
