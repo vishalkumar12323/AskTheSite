@@ -2,12 +2,13 @@ FROM node:22-alpine AS base
 
 WORKDIR /app
 
-RUN npm install -g pnpm@10.25.0
+RUN npm install --global pnpm@10.25.0
 
 # Copy only the API package files so pnpm install works correctly for the API
 COPY api/package.json api/pnpm-lock.yaml ./
 # Copy database package files so we can install its dependencies
 COPY database/package.json database/pnpm-lock.yaml /database/
+
 
 FROM base AS development
 ENV NODE_ENV=development
@@ -23,6 +24,8 @@ COPY api/ ./
 # Install dependencies for the API
 RUN pnpm install
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD --no-verbose --tries=1 --quiet --output-document=/dev/null "http://localhost:${PORT:-8000}/api/health" || exit 1
+
 CMD [ "pnpm", "start:dev" ]
 
 
@@ -35,8 +38,11 @@ RUN pnpm install --frozen-lockfile
 
 WORKDIR /app
 COPY api/ ./
-
 RUN pnpm install --frozen-lockfile
+
 RUN pnpm build
 
-CMD [ "node", "build/api/src/index.js" ]
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD --no-verbose --tries=1 --quiet --output-document=/dev/null "http://localhost:${PORT:-8000}/api/health" || exit 1
+
+CMD [ "pnpm", "start:prod" ]
