@@ -1,16 +1,15 @@
 import { Server as SocketIOServer } from "socket.io";
-import { Redis } from "ioredis";
-import { env } from "./config/env.js";
+import { redisSubscriber } from "./config/redis.js";
 import { getTaskService } from "./services/task.services.js";
 import http from "http";
 import { logger } from "./logger/logger.js";
 
 
-// Single shared Redis subscriber for all socket connections.
-// Unlike the regular redisConnection (used for BullMQ), a Redis client in
+// Single shared Redis Cluster subscriber for all socket connections.
+// Unlike the regular redisCluster (used for BullMQ/caching), a Redis client in
 // subscriber mode can ONLY run subscribe/unsubscribe commands, so we need
-// a dedicated instance.
-const subscriber = new Redis(env.REDIS_URL);
+// a dedicated instance (exported from config/redis.ts as redisSubscriber).
+const subscriber = redisSubscriber;
 
 // Track which taskIds have active listeners so we can unsubscribe when
 // the last socket leaves the room.
