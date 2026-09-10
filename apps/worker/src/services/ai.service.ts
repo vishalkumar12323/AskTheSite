@@ -19,14 +19,15 @@ export const askAI = async (
   }
 
   const prompt = `You are a helpful assistant that answers questions about websites.
-You are given website content below. Answer the user's question only using this content.
-Format your answer in Markdown for readability. Use headers, lists, code blocks, and bold text where appropriate.
-${conversationContext}
-Website Content:
-${webContent.slice(0, 10000)}
+                  You are given website content below. Answer the user's question only using this content.
+                  Format your answer in Markdown for readability. Use headers, lists, code blocks, and bold text where appropriate.
+                  ${conversationContext}
+                  Website Content:
+                  ${webContent.slice(0, 10000)}
 
-Question:
-${question}`;
+                  Question:
+                  ${question}
+`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
