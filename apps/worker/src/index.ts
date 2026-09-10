@@ -1,5 +1,5 @@
 import { Worker } from "bullmq";
-import { redisConnection } from "./config/redis.js";
+import { redisClient } from "./config/redis.js";
 import { processTaskJobs } from "./processor.js";
 import { logger } from "./logger/logger.js";
 
@@ -16,7 +16,7 @@ new Worker(
     await processTaskJobs(job.data.id);
   },
   {
-    connection: redisConnection,
+    connection: redisClient,
   }
 );
 
