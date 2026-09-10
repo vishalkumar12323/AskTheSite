@@ -10,7 +10,7 @@ import {
 import { askAI } from "./services/ai.service.js";
 import { scrapeWebsite } from "./services/scrape.service.js";
 
-import { redisConnection } from "./config/redis.js";
+import { redisClient } from "./config/redis.js";
 import { logger } from "./logger/logger.js";
 
 export const processTaskJobs = async (taskId: string) => {
@@ -37,7 +37,7 @@ export const processTaskJobs = async (taskId: string) => {
     const conversationId = task.conversationId;
 
     await markProcessing(taskId);
-    await redisConnection.publish(`task:${taskId}`, JSON.stringify({
+    await redisClient.publish(`task:${taskId}`, JSON.stringify({
       status: "PROCESSING",
       stage: "ANALYZING",
       progress: 25,
@@ -74,7 +74,7 @@ export const processTaskJobs = async (taskId: string) => {
       webContent = await scrapeWebsite(task.question.url);
     }
 
-    await redisConnection.publish(`task:${taskId}`, JSON.stringify({
+    await redisClient.publish(`task:${taskId}`, JSON.stringify({
       status: "PROCESSING",
       stage: "SCRAPING",
       progress: 40,
@@ -105,7 +105,7 @@ export const processTaskJobs = async (taskId: string) => {
 
     // ─── AI answer generation ───────────────────────────────────
     // Publish AI_THINKING BEFORE calling askAI so the UI reflects the correct stage
-    await redisConnection.publish(`task:${taskId}`, JSON.stringify({
+    await redisClient.publish(`task:${taskId}`, JSON.stringify({
       status: "PROCESSING",
       stage: "AI_THINKING",
       progress: 60,
@@ -116,7 +116,7 @@ export const processTaskJobs = async (taskId: string) => {
     const aiAns = await askAI(webContent, task.question.question, previousMessages);
 
     // ─── Save results ───────────────────────────────────────────
-    await redisConnection.publish(`task:${taskId}`, JSON.stringify({
+    await redisClient.publish(`task:${taskId}`, JSON.stringify({
       status: "PROCESSING",
       stage: "GENERATING",
       progress: 90,
@@ -126,7 +126,7 @@ export const processTaskJobs = async (taskId: string) => {
 
     await markCompleted(taskId, aiAns, conversationId ?? undefined);
 
-    await redisConnection.publish(`task:${taskId}`, JSON.stringify({
+    await redisClient.publish(`task:${taskId}`, JSON.stringify({
       status: "COMPLETED",
       stage: "DONE",
       progress: 100,
@@ -146,10 +146,10 @@ export const processTaskJobs = async (taskId: string) => {
         columns: { conversationId: true },
       });
       conversationId = task?.conversationId ?? null;
-    } catch {}
+    } catch { }
 
     await markFailed(taskId, error.message);
-    await redisConnection.publish(`task:${taskId}`, JSON.stringify({
+    await redisClient.publish(`task:${taskId}`, JSON.stringify({
       status: "FAILED",
       error: error.message,
       taskId,
