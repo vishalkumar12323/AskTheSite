@@ -3,10 +3,6 @@ import { env } from "./env.js";
 
 // ─── Parse endpoint ───────────────────────────────────────────────────────────
 // Accepts any of these formats:
-//   172.19.91.0:6379
-//   redis://172.19.91.0:6379
-//   rediss://askthesite-cache-dh37lk.serverless.aps1.cache.amazonaws.com:6379
-//   askthesite-cache-dh37lk.serverless.aps1.cache.amazonaws.com          (bare)
 function parseRedisEndpoint(raw: string): {
   host: string;
   port: number;
