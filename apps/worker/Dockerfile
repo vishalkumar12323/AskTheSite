@@ -26,8 +26,16 @@ COPY database/ ./database/
 WORKDIR /apps/worker
 RUN pnpm build
 
-# Copy entrypoint: branches on NODE_ENV passed via `docker run -e NODE_ENV="" ───────────
+# Copy entrypoint: branches on NODE_ENV passed via `docker run -e NODE_ENV=""` ───────────
 COPY worker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Health check port — curl is already available in the Playwright base image
+EXPOSE 3001
+
+# ECS task definition health check:
+#   CMD-SHELL, curl -f http://localhost:3001/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
 
 ENTRYPOINT [ "docker-entrypoint.sh" ]
