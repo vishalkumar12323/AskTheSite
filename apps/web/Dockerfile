@@ -3,6 +3,7 @@ FROM node:22-alpine AS base
 WORKDIR /app
 
 RUN npm install -g pnpm@10.25.0
+RUN apk add curl --no-cache
 
 COPY web/package.json web/pnpm-lock.yaml ./
 
