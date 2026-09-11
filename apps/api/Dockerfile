@@ -1,6 +1,7 @@
 FROM node:22-alpine AS base
 
 RUN npm install --global pnpm@10.25.0
+RUN apk add curl --no-cache
 
 # ── Mirror the local monorepo layout: /apps/api + /apps/database ─────────────
 # This is critical: tsconfig.json has rootDir: ".." which means the parent of
