@@ -148,7 +148,8 @@ const albStack = new AlbStack(app, "AskTheSite-AlbStack", {
     vpc: networkStack.vpc,
     albSecurityGroup: securityGroupsStack.albSecurityGroup,
     apiService: ecsStack.apiService,
-    webService: ecsStack.webService
+    webService: ecsStack.webService,
+    workerService: ecsStack.workerService
 });
 
 albStack.addStackDependency(networkStack);
