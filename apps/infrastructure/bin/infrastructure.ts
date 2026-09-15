@@ -127,6 +127,8 @@ const ecsStack = new EcsStack(app, "AskTheSite-EcsStack", {
 
     cacheEndpoint: cacheStack.cacheEndpoint,
     cachePort: cacheStack.cachePort,
+
+    imageTag: app.node.tryGetContext("imageTag") ?? "v1.0"
 });
 
 ecsStack.addStackDependency(networkStack);
