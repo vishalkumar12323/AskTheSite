@@ -10,7 +10,7 @@ import { createServer, IncomingMessage, ServerResponse } from "http";
 import { redisClient } from "./config/redis.js";
 import { logger } from "./logger/logger.js";
 
-const HEALTH_PORT = process.env.HEALTH_PORT ? Number(process.env.HEALTH_PORT) : 3001;
+const HEALTH_PORT = process.env.HEALTH_PORT ? Number(process.env.HEALTH_PORT) : 3002;
 
 async function checkRedis(): Promise<boolean> {
   try {
