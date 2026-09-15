@@ -123,6 +123,9 @@ export class EcsStack extends cdk.Stack {
                     props.databaseSecret,
                     "dbname"
                 ),
+            },
+            healthCheck: {
+                command: ["CMD-SHELL", "curl -f http://localhost:3001/api/health || exit 1"]
             }
         }).addPortMappings({
             containerPort: 3001,
@@ -178,6 +181,11 @@ export class EcsStack extends cdk.Stack {
             environment: {
                 NODE_ENV: "production",
                 PORT: "3000"
+            },
+            healthCheck: {
+                command: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"],
+                interval: cdk.Duration.seconds(55),
+                timeout: cdk.Duration.seconds(10),
             }
         }).addPortMappings({
             containerPort: 3000,
@@ -238,6 +246,9 @@ export class EcsStack extends cdk.Stack {
                 GEMINI_API_KEY: ecs.Secret.fromSecretsManager(
                     props.googleAIApiKeySecret
                 )
+            },
+            healthCheck: {
+                command: ["CMD-SHELL", "curl -f http://localhost:3002/health || exit 1"],
             }
         }).addPortMappings({
             containerPort: 3002,
