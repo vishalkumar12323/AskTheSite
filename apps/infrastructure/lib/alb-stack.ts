@@ -10,6 +10,7 @@ interface AlbStackProps extends cdk.StackProps {
 
     apiService: ecs.FargateService;
     webService: ecs.FargateService;
+    workerService: ecs.FargateService;
 }
 
 export class AlbStack extends cdk.Stack {
@@ -18,6 +19,7 @@ export class AlbStack extends cdk.Stack {
 
     public readonly apiService: ecs.FargateService;
     public readonly webService: ecs.FargateService;
+    public readonly workerService: ecs.FargateService;
 
     constructor(scope: Construct, id: string, props: AlbStackProps) {
         super(scope, id, props);
@@ -26,6 +28,7 @@ export class AlbStack extends cdk.Stack {
         this.albSecurityGroup = props.albSecurityGroup;
         this.apiService = props.apiService;
         this.webService = props.webService;
+        this.workerService = props.workerService;
 
 
 
@@ -85,9 +88,30 @@ export class AlbStack extends cdk.Stack {
             }
         });
 
+        // WORKER Service Target Group
+        const workerTargetGroup = new elbv2.ApplicationTargetGroup(this, "WorkertargetGroup", {
+            vpc: props.vpc,
+            port: 3002,
+            protocol: elbv2.ApplicationProtocol.HTTP,
+            targetType: elbv2.TargetType.IP,
+
+            healthCheck: {
+                path: "/health",
+                protocol: elbv2.Protocol.HTTP,
+                port: "3002",
+                healthyHttpCodes: "200-299",
+
+                interval: cdk.Duration.seconds(30),
+                timeout: cdk.Duration.seconds(5),
+                healthyThresholdCount: 2,
+                unhealthyThresholdCount: 3,
+            }
+        })
+
         // Attaching ECS Services to target groups
         this.apiService.attachToApplicationTargetGroup(apiTargetGroup);
         this.webService.attachToApplicationTargetGroup(webTargetGroup);
+        this.workerService.attachToApplicationTargetGroup(workerTargetGroup);
 
 
         // Create HTTP Listener
@@ -108,7 +132,18 @@ export class AlbStack extends cdk.Stack {
                 ])
             ],
             targetGroups: [apiTargetGroup]
-        })
+        });
+
+        // Add WORKER path-based routing
+        httpListener.addTargetGroups("WorkerHealthCheckPathRule", {
+            priority: 2,
+            conditions: [
+                elbv2.ListenerCondition.pathPatterns([
+                    "/health"
+                ])
+            ],
+            targetGroups: [workerTargetGroup]
+        });
 
 
 
