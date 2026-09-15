@@ -229,13 +229,17 @@ export class EcsStack extends cdk.Stack {
             }),
             environment: {
                 NODE_ENV: "production",
-                REDIS_URL: `redis://${props.cacheEndpoint}:${props.cachePort}`
+                REDIS_URL: `redis://${props.cacheEndpoint}:${props.cachePort}`,
+                HEALTH_PORT: "3002"
             },
             secrets: {
                 GEMINI_API_KEY: ecs.Secret.fromSecretsManager(
                     props.googleAIApiKeySecret
                 )
             }
+        }).addPortMappings({
+            containerPort: 3002,
+            protocol: ecs.Protocol.TCP
         });
 
         // WORKER Service
