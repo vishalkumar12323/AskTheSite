@@ -23,6 +23,8 @@ interface EcsStackProps extends cdk.StackProps {
 
     cacheEndpoint: string;
     cachePort: string;
+
+    imageTag: string;
 }
 
 export class EcsStack extends cdk.Stack {
@@ -90,7 +92,7 @@ export class EcsStack extends cdk.Stack {
         });
 
         this.apiTaskDefinition.addContainer("ApiContainer", {
-            image: ecs.ContainerImage.fromEcrRepository(props.apiRepository, "v1.0"),
+            image: ecs.ContainerImage.fromEcrRepository(props.apiRepository, props.imageTag),
             logging: ecs.LogDrivers.awsLogs({
                 streamPrefix: "api",
                 logGroup: apiLogGroup
@@ -168,7 +170,7 @@ export class EcsStack extends cdk.Stack {
         });
 
         this.webTaskDefinition.addContainer("WebContainer", {
-            image: ecs.ContainerImage.fromEcrRepository(props.webRepository, "v1.0"),
+            image: ecs.ContainerImage.fromEcrRepository(props.webRepository, props.imageTag),
             logging: ecs.LogDrivers.awsLogs({
                 streamPrefix: "web",
                 logGroup: webLogGroup
@@ -222,7 +224,7 @@ export class EcsStack extends cdk.Stack {
         });
 
         this.workerTaskDefinition.addContainer("WorkerContainer", {
-            image: ecs.ContainerImage.fromEcrRepository(props.workerRepository, "v1.0"),
+            image: ecs.ContainerImage.fromEcrRepository(props.workerRepository, props.imageTag),
             logging: ecs.LogDrivers.awsLogs({
                 streamPrefix: "worker",
                 logGroup: workerLogGroup
