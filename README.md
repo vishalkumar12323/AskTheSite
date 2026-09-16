@@ -132,11 +132,11 @@
 
     Worker
 
-    Frontend runs separately using Next.js dev server.
+    Frontend runs separately using Next.js server.
 
 ### Production
 
-    Change API build target in docker-compose.yml:
+    Change the API build target in docker-compose.yml:
     target: prod
 
     docker compose up --build
